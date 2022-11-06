@@ -1,0 +1,27 @@
+{
+  "name": "elm-embed-boilerplate",
+  "version": "0.1.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build --target embed",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "source": "src/index.html",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "elm": "^0.19.1-5"
+  },
+  "devDependencies": {
+    "@parcel/transformer-elm": "^2.7.0",
+    "elm-format": "^0.8.5",
+    "parcel": "^2.7.0"
+  },
+  "targets": {
+    "embed": {
+      "source": "src/index.js",
+      "distDir": "./build"
+    }
+  }
+}
