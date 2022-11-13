@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "noFallthroughCasesInSwitch": true,
+        "forceConsistentCasingInFileNames": true,
+        "target": "ES2021",
+        "module": "ESNext"
+    },
+    "include": [
+        "src/*"
+    ]
+}

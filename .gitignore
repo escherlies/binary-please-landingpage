@@ -3,3 +3,4 @@ elm-stuff
 dist
 build
 .parcel-cache
+.vscode
