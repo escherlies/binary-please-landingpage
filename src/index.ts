@@ -1,4 +1,4 @@
-import { Elm } from "./Main.elm"
+import { Elm } from "./elm/Main.elm"
 
 class ElmCounter extends HTMLElement {
   toElm: (msg: string) => void = () => null
