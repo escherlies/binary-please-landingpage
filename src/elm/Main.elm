@@ -1,15 +1,15 @@
 port module Main exposing (..)
 
-import Browser
-import Element exposing (el, fill, height, px, scrollbars, width)
+import Browser exposing (Document)
+import Context exposing (Context)
+import Element exposing (el, fill, height, px, rgba, scrollbars, width)
 import Element.Background
-import Html exposing (Html)
 import UI exposing (..)
 
 
 main : Program () Model Msg
 main =
-    Browser.element
+    Browser.document
         { init = init
         , update = update
         , view = view
@@ -76,24 +76,39 @@ update msg model =
             ( { model | messages = m :: model.messages }, Cmd.none )
 
 
-view : Model -> Html Msg
+view : Model -> Document Msg
 view model =
-    root
-        (col center
-            [ row
-                [ button "-" Decrement
-                , el [ Element.centerX ] <| text (String.fromInt model.counter)
-                , button "+" Increment
-                ]
-            , col []
-                [ button "Send Message" SendMessage
-                , col
-                    [ height (px 100)
-                    , scrollbars
-                    , width fill
-                    , Element.Background.color colors.shade1
+    { title = "Binary Please"
+    , body =
+        [ root getContext
+            (col center
+                [ row
+                    [ button "-" Decrement
+                    , el [ Element.centerX ] <| text (String.fromInt model.counter)
+                    , button "+" Increment
                     ]
-                    (List.map text model.messages)
+                , col []
+                    [ button "Send Message" SendMessage
+                    , col
+                        [ height (px 100)
+                        , scrollbars
+                        , width fill
+                        , Element.Background.color colors.shade1
+                        ]
+                        (List.map text model.messages)
+                    ]
                 ]
-            ]
-        )
+            )
+        ]
+    }
+
+
+getContext : Context
+getContext =
+    { ui =
+        { colors =
+            { foreground = rgba 0.2 0.2 0.2 1
+            , background = rgba 0.9 0.9 0.9 1
+            }
+        }
+    }

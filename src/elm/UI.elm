@@ -1,4 +1,4 @@
-module UI exposing (button, center, col, colors, root, row, text)
+module UI exposing (UI, button, center, col, colors, root, row, text)
 
 import Element exposing (..)
 import Element.Background
@@ -9,12 +9,28 @@ import Html exposing (Html)
 import List exposing (singleton)
 
 
+type alias UI =
+    { colors :
+        { foreground : Color
+        , background : Color
+        }
+    }
+
+
+type alias UiContext a =
+    { a | ui : UI }
+
+
 {-| Top level node
 -}
-root : Element msg -> Html msg
-root =
+root : UiContext a -> Element msg -> Html msg
+root ctx =
     layout
         [ Element.Font.size 14
+        , Element.Background.color ctx.ui.colors.background
+        , Element.Font.color ctx.ui.colors.foreground
+        , width fill
+        , height fill
         ]
 
 
