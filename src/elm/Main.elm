@@ -3,12 +3,18 @@ port module Main exposing (..)
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
 import Element exposing (el, fill, height, padding, px, scrollbars, width)
+import Json.Decode as D exposing (Decoder, Value)
 import UI exposing (..)
 import UI.Color
-import UI.Theme exposing (Appereance(..))
+import UI.Theme exposing (Appereance(..), decodeColorScheme)
 
 
-main : Program () Model Msg
+type alias Flags =
+    { prefersColorScheme : Appereance
+    }
+
+
+main : Program D.Value Model Msg
 main =
     Browser.document
         { init = init
@@ -21,8 +27,34 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
-        [ portReceive GotMessage
+        [ portReceive decodePortMessage
         ]
+
+
+decodePortMessage : Value -> Msg
+decodePortMessage dv =
+    dv
+        |> D.decodeValue
+            (D.field "tag" D.string
+                |> D.andThen
+                    (\tag ->
+                        case tag of
+                            "UpdatePrefersColorScheme" ->
+                                D.map UpdatePrefersColorScheme (D.field "value" decodeColorScheme)
+
+                            other ->
+                                D.fail <| "Unkowm message type" ++ other
+                    )
+            )
+        |> Result.mapError D.errorToString
+        |> (\r ->
+                case r of
+                    Ok msg ->
+                        msg
+
+                    Err s ->
+                        GotError s
+           )
 
 
 
@@ -32,7 +64,7 @@ subscriptions _ =
 port portSend : String -> Cmd msg
 
 
-port portReceive : (String -> msg) -> Sub msg
+port portReceive : (D.Value -> msg) -> Sub msg
 
 
 
@@ -48,29 +80,60 @@ type alias Model =
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
-    ( { counter = 0
-      , messages = []
-      , settings =
-            { theme = Light
-            }
-      }
-    , Cmd.none
-    )
+init : D.Value -> ( Model, Cmd Msg )
+init fd =
+    let
+        fr =
+            fd
+                |> D.decodeValue
+                    flagsDecoder
+    in
+    case fr of
+        Ok f ->
+            ( { counter = 0
+              , messages = []
+              , settings =
+                    { theme = f.prefersColorScheme
+                    }
+              }
+            , Cmd.none
+            )
+
+        Err _ ->
+            ( { counter = 0
+              , messages = []
+              , settings =
+                    { theme = Light
+                    }
+              }
+            , Cmd.none
+            )
+
+
+flagsDecoder : Decoder Flags
+flagsDecoder =
+    D.map Flags
+        (D.field "prefersColorScheme" decodeColorScheme)
 
 
 type Msg
     = Increment
     | Decrement
     | SendMessage
-    | GotMessage String
     | ToggleAppereance
+    | UpdatePrefersColorScheme Appereance
+    | GotError String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        GotError s ->
+            ( model, Cmd.none )
+
+        UpdatePrefersColorScheme scheme ->
+            ( { model | settings = model.settings |> (\s -> { s | theme = scheme }) }, Cmd.none )
+
         Increment ->
             ( { model | counter = model.counter + 1 }, Cmd.none )
 
@@ -79,9 +142,6 @@ update msg model =
 
         SendMessage ->
             ( model, portSend "Hello!" )
-
-        GotMessage m ->
-            ( { model | messages = m :: model.messages }, Cmd.none )
 
         ToggleAppereance ->
             (case model.settings.theme of
@@ -139,7 +199,7 @@ view model =
 getContext : Model -> Context
 getContext m =
     { ui =
-        { colors = UI.Color.fromTheme UI.Theme.fromPalettes m.settings.theme
+        { colors = UI.Color.fromTheme UI.Theme.theme1 m.settings.theme
         }
     , lang = De
     , version = 1

@@ -1,23 +1,21 @@
 declare module "*.elm" {
-    export const Elm: {
-        Main: {
-            init: (options: Options) => {
-                ports: Ports
-            }
-        }
+  export const Elm: {
+    Main: {
+      init: (options: Options) => {
+        ports: Ports
+      }
     }
+  }
 }
 
 
 type Options = {
-    node?: HTMLElement
-    flags?: {
-        // Elm Flags
-    }
+  node?: HTMLElement
+  flags?: unknown
 }
 
 
 type Ports = {
-    portReceive: { send: (msg: string) => void }
-    portSend: { subscribe: (callback: (message: string) => void) => void }
+  portReceive: { send: (msg: unknown) => void }
+  portSend: { subscribe: (callback: (message: string) => void) => void }
 }
