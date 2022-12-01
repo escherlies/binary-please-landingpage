@@ -13,21 +13,21 @@ fromPalette =
 
 {-| Parses different palette formats
 
-    fromPalette "https://huemint.com/website-monochrome/#palette=fffffc-00eb80"
+    parsePalette "https://huemint.com/website-monochrome/#palette=fffffc-00eb80"
     --> Ok [ "fffffc", "00eb80" ]
 
-    fromPalette """
+    parsePalette """
                 fffffc
                 00eb80
                 000000
                 """
     --> Ok [ "fffffc", "00eb80", "000000" ]
 
-    fromPalette "https://coolors.co/40f99b-61707d"
+    parsePalette "https://coolors.co/40f99b-61707d"
     --> Ok [ "40f99b", "61707d" ]
 
     -- Infact, it works with everything that has 6 digits hex values
-    fromPalette "xxxxfffffc-00eb80x000000---"
+    parsePalette "xxxxfffffc-00eb80x000000---"
     --> Ok [ "fffffc", "00eb80", "000000" ]
 
 -}

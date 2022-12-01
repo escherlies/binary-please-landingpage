@@ -1,6 +1,8 @@
 module UI.Theme exposing (..)
 
 import Color exposing (Color, rgb)
+import Color.Manipulate exposing (invert)
+import Color.Palette exposing (fromPalette)
 import Parser exposing ((|.), (|=), Step(..))
 
 
@@ -9,11 +11,52 @@ type Appereance
     | Light
 
 
-type Theme
+getTheme : Theme -> Appereance -> ThemeType
+getTheme t a =
+    case a of
+        Light ->
+            t.light
+
+        Dark ->
+            t.dark
+
+
+type alias Theme =
+    { light : ThemeType
+    , dark : ThemeType
+    }
+
+
+type ThemeType
     = Duotone Color Color
 
 
-getColors : Appereance -> Theme
+toDuotone : List Color -> ThemeType
+toDuotone clrs =
+    case clrs of
+        fg :: bg :: [] ->
+            Duotone fg bg
+
+        fg :: [] ->
+            Duotone fg (invert fg)
+
+        _ ->
+            Duotone (rgb 0.2 0.2 0.2) (rgb 1 1 1)
+
+
+fromPalettes : Theme
+fromPalettes =
+    { light =
+        fromPalette "https://huemint.com/website-monochrome/#palette=fffffc-00eb80"
+            |> List.reverse
+            |> toDuotone
+    , dark =
+        fromPalette "https://coolors.co/40f99b-61707d"
+            |> toDuotone
+    }
+
+
+getColors : Appereance -> ThemeType
 getColors theme =
     case theme of
         Light ->

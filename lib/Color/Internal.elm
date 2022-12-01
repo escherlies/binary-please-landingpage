@@ -31,6 +31,15 @@ rgb r g b =
 
 
 
+-- Transform
+
+
+mapRgb : (Float -> Float) -> Color -> Color
+mapRgb fn (Rgba r g b a) =
+    Rgba (fn r) (fn g) (fn b) a
+
+
+
 -- Parse
 
 

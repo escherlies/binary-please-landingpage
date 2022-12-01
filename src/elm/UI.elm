@@ -1,4 +1,4 @@
-module UI exposing (UI, button, center, col, colors, root, row, text)
+module UI exposing (UI, UiContext, button, center, col, colors, root, row, text)
 
 import Element exposing (..)
 import Element.Background
@@ -7,13 +7,11 @@ import Element.Font
 import Element.Input
 import Html exposing (Html)
 import List exposing (singleton)
+import UI.Color
 
 
 type alias UI =
-    { colors :
-        { foreground : Color
-        , background : Color
-        }
+    { colors : UI.Color.Colors
     }
 
 
@@ -84,9 +82,7 @@ buttonWith : Element msg -> msg -> Element msg
 buttonWith label msg =
     Element.Input.button
         [ Element.Border.width 1
-        , Element.Border.color colors.shade3
         , Element.Border.rounded 5
-        , Element.Background.color colors.shade2
         , width (shrink |> minimum 25)
         , paddingXY 14 11
         ]
