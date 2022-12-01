@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (el, fill, height, padding, px, scrollbars, width)
+import Element exposing (el, fill, height, padding, width)
 import Json.Decode as D exposing (Decoder, Value)
 import UI exposing (..)
 import UI.Color
@@ -71,9 +71,13 @@ port portReceive : (D.Value -> msg) -> Sub msg
 -- Model
 
 
+type Message
+    = Error String
+
+
 type alias Model =
     { counter : Int
-    , messages : List String
+    , messages : List Message
     , settings :
         { theme : Appereance
         }
@@ -123,11 +127,15 @@ type Msg
     | ToggleAppereance
     | UpdatePrefersColorScheme Appereance
     | GotError String
+    | CloseMessage Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        CloseMessage index ->
+            ( model, Cmd.none )
+
         GotError s ->
             ( model, Cmd.none )
 
@@ -159,23 +167,22 @@ view model =
     { title = "Binary Please"
     , body =
         [ root (getContext model)
-            (col [ width fill, height fill, padding 20 ]
+            (col
+                [ width fill
+                , height fill
+                , padding 20
+                , Element.inFront
+                    (col
+                        [ width fill
+                        ]
+                        (List.map getMessage model.messages)
+                    )
+                ]
                 [ col center
                     [ row
                         [ button "-" Decrement
                         , el [ Element.centerX ] <| text (String.fromInt model.counter)
                         , button "+" Increment
-                        ]
-                    , col []
-                        [ button "Send Message" SendMessage
-                        , col
-                            [ height (px 100)
-                            , scrollbars
-                            , width fill
-
-                            -- , Element.Background.color colors.shade1
-                            ]
-                            (List.map text model.messages)
                         ]
                     ]
                 , col [ Element.centerX ]
@@ -194,6 +201,13 @@ view model =
             )
         ]
     }
+
+
+getMessage : Message -> Element.Element Msg
+getMessage arg1 =
+    case arg1 of
+        Error err ->
+            el [] (text err)
 
 
 getContext : Model -> Context
