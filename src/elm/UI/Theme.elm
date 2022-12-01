@@ -47,12 +47,9 @@ toDuotone clrs =
 fromPalettes : Theme
 fromPalettes =
     { light =
-        fromPalette "https://huemint.com/website-monochrome/#palette=fffffc-00eb80"
-            |> List.reverse
-            |> toDuotone
+        fromPalette "https://coolors.co/858ae3-fffffc" |> toDuotone
     , dark =
-        fromPalette "https://coolors.co/40f99b-61707d"
-            |> toDuotone
+        fromPalette "https://coolors.co/858ae3-fffffc" |> List.reverse |> toDuotone
     }
 
 
