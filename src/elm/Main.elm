@@ -1,12 +1,14 @@
 port module Main exposing (..)
 
+import Array exposing (Array)
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (clip, el, fill, height, htmlAttribute, padding, px, row, width)
+import Element exposing (Element, clip, el, fill, height, htmlAttribute, padding, px, row, width)
 import Element.Border
 import Element.Events exposing (onMouseDown, onMouseUp)
 import Html.Events
 import Json.Decode as D exposing (Decoder, Value)
+import Maybe.Extra
 import UI exposing (button, center, col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
@@ -93,11 +95,11 @@ type alias Model =
     { counter : Int
     , messages : List Message
     , mousePosition : Position
-    , windowPosition : Position
+    , windows : Array Position
     , settings :
         { theme : Appereance
         }
-    , isDragging : Bool
+    , isDragging : Maybe Int
     }
 
 
@@ -109,6 +111,7 @@ init fd =
                 |> D.decodeValue
                     flagsDecoder
 
+        withF : Flags -> ( Model, Cmd msg )
         withF f =
             ( { counter = 0
               , messages = []
@@ -116,8 +119,8 @@ init fd =
                     { theme = f.prefersColorScheme
                     }
               , mousePosition = { x = 0, y = 0 }
-              , windowPosition = { x = 0, y = 0 }
-              , isDragging = False
+              , windows = Array.fromList <| List.map Tuple.first windows
+              , isDragging = Nothing
               }
             , Cmd.none
             )
@@ -144,7 +147,7 @@ type Msg
     | UpdatePrefersColorScheme Appereance
     | GotError String
     | CloseMessage Int
-    | TrackWindow
+    | TrackWindow Int
     | StopTrackWindow
     | MouseMove Float Float
 
@@ -164,23 +167,35 @@ update msg model =
             in
             ( { model
                 | mousePosition = mp
-                , windowPosition =
-                    if model.isDragging then
-                        { x = model.windowPosition.x + delta.x
-                        , y = model.windowPosition.y + delta.y
-                        }
+                , windows =
+                    Maybe.Extra.unwrap
+                        model.windows
+                        (\ix ->
+                            let
+                                cw =
+                                    Array.get ix model.windows
+                            in
+                            case cw of
+                                Just wp ->
+                                    Array.set ix
+                                        { x = wp.x + delta.x
+                                        , y = wp.y + delta.y
+                                        }
+                                        model.windows
 
-                    else
-                        model.windowPosition
+                                Nothing ->
+                                    Array.push mp model.windows
+                        )
+                        model.isDragging
               }
             , Cmd.none
             )
 
-        TrackWindow ->
-            ( { model | isDragging = True }, Cmd.none )
+        TrackWindow ix ->
+            ( { model | isDragging = Just ix }, Cmd.none )
 
         StopTrackWindow ->
-            ( { model | isDragging = False }, Cmd.none )
+            ( { model | isDragging = Nothing }, Cmd.none )
 
         CloseMessage _ ->
             Debug.todo "Implement CloseMessage"
@@ -217,51 +232,27 @@ view model =
     , body =
         [ root (getContext model)
             (col
-                [ width fill
-                , height fill
-                , clip
-                , padding 20
-                , onMouseUp StopTrackWindow
-                , htmlAttribute
+                ([ width fill
+                 , height fill
+                 , clip
+                 , padding 20
+                 , onMouseUp StopTrackWindow
+                 , htmlAttribute
                     (Html.Events.on "mousemove"
                         (D.map2 MouseMove
                             (D.field "clientX" D.float)
                             (D.field "clientY" D.float)
                         )
                     )
-                , Element.inFront
+                 , Element.inFront
                     (col
                         [ width fill
                         ]
                         (List.map getMessage model.messages)
                     )
-                , Element.inFront
-                    (el
-                        [ Element.moveRight model.windowPosition.x
-                        , Element.moveDown model.windowPosition.y
-                        ]
-                     <|
-                        col
-                            (center
-                                ++ [ Element.Border.width 3
-                                   , width (px 300)
-                                   , onMouseDown TrackWindow
-                                   ]
-                            )
-                            [ row
-                                [ height (px 42)
-                                , width fill
-                                , Element.Border.width 3
-                                ]
-                                []
-                            , row
-                                [ height (px 200)
-                                , width fill
-                                ]
-                                []
-                            ]
-                    )
-                ]
+                 ]
+                    ++ renderWindows model
+                )
                 [ col [ Element.centerX ]
                     [ el [ Element.alignBottom, Element.centerX ]
                         (button
@@ -278,6 +269,50 @@ view model =
             )
         ]
     }
+
+
+renderWindows : Model -> List (Element.Attribute Msg)
+renderWindows model =
+    let
+        foo =
+            List.map2 Tuple.pair (Array.toList model.windows) (List.map Tuple.second windows)
+    in
+    List.indexedMap rendewWindow foo
+
+
+rendewWindow ix ( position, content ) =
+    Element.inFront
+        (el
+            [ Element.moveRight position.x
+            , Element.moveDown position.y
+            ]
+         <|
+            col
+                (center
+                    ++ [ Element.Border.width 3
+                       , width (px 300)
+                       , onMouseDown (TrackWindow ix)
+                       ]
+                )
+                [ row
+                    [ height (px 42)
+                    , width fill
+                    , Element.Border.width 3
+                    ]
+                    []
+                , row
+                    [ height (px 200)
+                    , width fill
+                    ]
+                    [ content ]
+                ]
+        )
+
+
+windows : List ( Position, Element Msg )
+windows =
+    [ ( setPosition 300 300, text "Content" )
+    ]
 
 
 getMessage : Message -> Element.Element Msg
