@@ -1,20 +1,18 @@
 port module Main exposing (..)
 
-import Array exposing (Array)
+import Array
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (Attribute, Element, clip, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, padding, px, rgb, row, width)
-import Element.Background
-import Element.Border
-import Element.Events exposing (onMouseDown, onMouseUp)
+import Element exposing (Element, clip, el, fill, height, htmlAttribute, padding, width)
+import Element.Events exposing (onMouseUp)
 import Element.Font
-import Html.Attributes
 import Html.Events
 import Json.Decode as D exposing (Decoder, Value)
-import Math.Vector2 exposing (Vec2, add, getX, getY, scale, sub, vec2)
+import Math.Vector2 exposing (Vec2, sub, vec2)
 import UI exposing (button, col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
+import Window exposing (Window)
 
 
 type alias Flags =
@@ -83,38 +81,14 @@ type Message
     = Error String
 
 
-type alias Window =
-    { position : Vec2
-    , size : Vec2
-    }
-
-
-type Corner
-    = Top
-    | Right
-    | Bottom
-    | Left
-    | BottomRight
-    | BottomLeft
-    | TopRight
-    | TopLeft
-
-
-type Dragging
-    = None
-    | Reszie Int Corner
-    | Move Int
-
-
 type alias Model =
     { counter : Int
     , messages : List Message
     , mousePosition : Vec2
-    , windows : Array Window
     , settings :
         { theme : Appereance
         }
-    , isDragging : Dragging
+    , windowModel : Window.Model
     }
 
 
@@ -134,8 +108,7 @@ init fd =
                     { theme = f.prefersColorScheme
                     }
               , mousePosition = vec2 0 0
-              , windows = Array.fromList <| List.map Tuple.first windowElements
-              , isDragging = None
+              , windowModel = Window.init windowElements
               }
             , Cmd.none
             )
@@ -162,15 +135,19 @@ type Msg
     | UpdatePrefersColorScheme Appereance
     | GotError String
     | CloseMessage Int
-    | TrackWindow Int
-    | ResizeWindow Int Corner
-    | StopTrackWindow
     | MouseMove Float Float
+    | WindowMsg Window.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        WindowMsg sm ->
+            Window.update sm model.windowModel
+                |> (\( wm, wcmds ) ->
+                        ( { model | windowModel = wm }, wcmds )
+                   )
+
         MouseMove x y ->
             let
                 mp =
@@ -181,50 +158,10 @@ update msg model =
             in
             ( { model
                 | mousePosition = mp
-                , windows =
-                    case model.isDragging of
-                        None ->
-                            model.windows
-
-                        Move ix ->
-                            let
-                                cw =
-                                    Array.get ix model.windows
-                            in
-                            case cw of
-                                Just wp ->
-                                    Array.set ix
-                                        { wp | position = add wp.position delta }
-                                        model.windows
-
-                                Nothing ->
-                                    -- Should never happen
-                                    model.windows
-
-                        Reszie ix corner ->
-                            let
-                                cw =
-                                    Array.get ix model.windows
-                            in
-                            case cw of
-                                Just wp ->
-                                    handleRezise ix wp corner delta model.windows
-
-                                Nothing ->
-                                    -- Should never happen
-                                    model.windows
+                , windowModel = Window.updateWindows model.windowModel mp delta
               }
             , Cmd.none
             )
-
-        ResizeWindow ix dir ->
-            ( { model | isDragging = Reszie ix dir }, Cmd.none )
-
-        TrackWindow ix ->
-            ( { model | isDragging = Move ix }, Cmd.none )
-
-        StopTrackWindow ->
-            ( { model | isDragging = None }, Cmd.none )
 
         CloseMessage _ ->
             Debug.todo "Implement CloseMessage"
@@ -255,69 +192,6 @@ update msg model =
                 |> (\new -> ( { model | settings = model.settings |> (\s -> { s | theme = new }) }, Cmd.none ))
 
 
-handleRezise : Int -> Window -> Corner -> Vec2 -> Array Window -> Array Window
-handleRezise ix wp corner delta windows =
-    case corner of
-        Bottom ->
-            Array.set ix
-                { wp | size = add wp.size (Math.Vector2.setX 0 delta) }
-                windows
-
-        Top ->
-            Array.set ix
-                { wp
-                    | size = add wp.size (Math.Vector2.setX 0 delta |> scale -1)
-                    , position = add wp.position (Math.Vector2.setX 0 delta)
-                }
-                windows
-
-        Right ->
-            Array.set ix
-                { wp | size = add wp.size (Math.Vector2.setY 0 delta) }
-                windows
-
-        Left ->
-            Array.set ix
-                { wp
-                    | size = add wp.size (Math.Vector2.setY 0 delta |> scale -1)
-                    , position = add wp.position (Math.Vector2.setY 0 delta)
-                }
-                windows
-
-        BottomRight ->
-            Array.set ix
-                { wp | size = add wp.size delta }
-                windows
-
-        BottomLeft ->
-            Array.set ix
-                { wp
-                    | size =
-                        add wp.size (Math.Vector2.setY 0 delta |> scale -1)
-                            |> (\size -> add size (Math.Vector2.setX 0 delta))
-                    , position = add wp.position (Math.Vector2.setY 0 delta)
-                }
-                windows
-
-        TopRight ->
-            Array.set ix
-                { wp
-                    | size =
-                        add wp.size (Math.Vector2.setX 0 delta |> scale -1)
-                            |> (\size -> add size (Math.Vector2.setY 0 delta))
-                    , position = add wp.position (Math.Vector2.setX 0 delta)
-                }
-                windows
-
-        TopLeft ->
-            Array.set ix
-                { wp
-                    | size = add wp.size (delta |> scale -1)
-                    , position = add wp.position delta
-                }
-                windows
-
-
 view : Model -> Document Msg
 view model =
     { title = "Binary Please"
@@ -328,7 +202,7 @@ view model =
                  , height fill
                  , clip
                  , padding 20
-                 , onMouseUp StopTrackWindow
+                 , onMouseUp (WindowMsg Window.StopTrackWindow)
                  , htmlAttribute
                     (Html.Events.on "mousemove"
                         (D.map2 MouseMove
@@ -367,119 +241,16 @@ renderWindows : Model -> List (Element.Attribute Msg)
 renderWindows model =
     let
         foo =
-            List.map2 Tuple.pair (Array.toList model.windows) (List.map Tuple.second windowElements)
+            List.map2
+                Tuple.pair
+                (Array.toList model.windowModel.windows)
+                (List.map Tuple.second windowElements)
     in
-    List.indexedMap rendewWindow foo
+    List.indexedMap Window.rendewWindow foo
+        |> List.map (Element.mapAttribute WindowMsg)
 
 
-bc : Corner -> List (Attribute Msg) -> String -> Int -> Element Msg
-bc corner attrs c ix =
-    el
-        ([ onMouseDown (ResizeWindow ix corner)
-         , cursor c
-         ]
-            ++ attrs
-        )
-        Element.none
-
-
-rendewWindow : Int -> ( Window, Element Msg ) -> Element.Attribute Msg
-rendewWindow ix ( position, content ) =
-    let
-        bw =
-            3
-
-        overhang =
-            0
-
-        rs =
-            bw
-    in
-    Element.inFront
-        (el
-            [ Element.moveRight (getX position.position)
-            , Element.moveDown (getY position.position)
-            , height (px <| round <| getY position.size)
-            , width (px <| round <| getX position.size)
-            , Element.Background.color (rgb 0.98 0.98 0.98)
-            , Element.onLeft
-                (bc Left
-                    [ height fill
-                    , width (px rs)
-                    , moveRight rs
-                    ]
-                    "ew-resize"
-                    ix
-                )
-            , Element.onRight
-                (bc Right
-                    [ height fill
-                    , width (px rs)
-                    , moveLeft rs
-                    ]
-                    "ew-resize"
-                    ix
-                )
-            , Element.above
-                (row [ width fill, moveDown (bw + overhang) ]
-                    [ bc TopLeft [ height (px rs), width (px rs) ] "nw-resize" ix
-                    , bc Top [ height (px rs), width fill ] "ns-resize" ix
-                    , bc TopRight [ height (px rs), width (px rs) ] "ne-resize" ix
-                    ]
-                )
-            , Element.below
-                (row [ width fill, moveUp (bw + overhang) ]
-                    [ bc BottomLeft [ height (px rs), width (px rs) ] "sw-resize" ix
-                    , bc Bottom [ height (px rs), width fill ] "ns-resize" ix
-                    , bc BottomRight [ height (px rs), width (px rs) ] "se-resize" ix
-                    ]
-                )
-            ]
-         <|
-            col
-                [ Element.Border.width 3
-                , width fill
-                , height fill
-                ]
-                [ row
-                    [ height (px 40)
-                    , width fill
-                    , Element.Border.widthEach
-                        { top = 0
-                        , left = 0
-                        , right = 0
-                        , bottom = 3
-                        }
-                    , onMouseDown (TrackWindow ix)
-                    ]
-                    []
-                , content
-                ]
-        )
-
-
-cursor : String -> Attribute msg
-cursor c =
-    htmlAttribute (Html.Attributes.style "cursor" c)
-
-
-resizer : Corner -> (Element Msg -> a) -> List (Attribute Msg) -> String -> Int -> a
-resizer corner position adjustPosition c ix =
-    position
-        (el
-            (adjustPosition
-                ++ [ Element.mouseOver
-                        [ Element.Background.color (rgb 1 0.5 0.5)
-                        ]
-                   , htmlAttribute (Html.Attributes.style "cursor" c)
-                   , onMouseDown (ResizeWindow ix corner)
-                   ]
-            )
-            Element.none
-        )
-
-
-windowElements : List ( Window, Element Msg )
+windowElements : List ( Window, Element msg )
 windowElements =
     [ ( { position = vec2 300 300
         , size = vec2 320 240
