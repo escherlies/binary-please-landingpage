@@ -132,65 +132,57 @@ updateWindows model _ delta =
 
 handleRezise : Int -> Window -> Corner -> Vec2 -> Array Window -> Array Window
 handleRezise ix wp corner delta windows =
-    case corner of
+    (case corner of
         Bottom ->
-            Array.set ix
-                { wp | size = add wp.size (Math.Vector2.setX 0 delta) }
-                windows
+            { wp
+                | size = add wp.size (Math.Vector2.setX 0 delta)
+            }
 
         Top ->
-            Array.set ix
-                { wp
-                    | size = add wp.size (Math.Vector2.setX 0 delta |> scale -1)
-                    , position = add wp.position (Math.Vector2.setX 0 delta)
-                }
-                windows
+            { wp
+                | size = add wp.size (Math.Vector2.setX 0 delta |> scale -1)
+                , position = add wp.position (Math.Vector2.setX 0 delta)
+            }
 
         Right ->
-            Array.set ix
-                { wp | size = add wp.size (Math.Vector2.setY 0 delta) }
-                windows
+            { wp
+                | size = add wp.size (Math.Vector2.setY 0 delta)
+            }
 
         Left ->
-            Array.set ix
-                { wp
-                    | size = add wp.size (Math.Vector2.setY 0 delta |> scale -1)
-                    , position = add wp.position (Math.Vector2.setY 0 delta)
-                }
-                windows
+            { wp
+                | size = add wp.size (Math.Vector2.setY 0 delta |> scale -1)
+                , position = add wp.position (Math.Vector2.setY 0 delta)
+            }
 
         BottomRight ->
-            Array.set ix
-                { wp | size = add wp.size delta }
-                windows
+            { wp
+                | size = add wp.size delta
+            }
 
         BottomLeft ->
-            Array.set ix
-                { wp
-                    | size =
-                        add wp.size (Math.Vector2.setY 0 delta |> scale -1)
-                            |> (\size -> add size (Math.Vector2.setX 0 delta))
-                    , position = add wp.position (Math.Vector2.setY 0 delta)
-                }
-                windows
+            { wp
+                | size =
+                    add wp.size (Math.Vector2.setY 0 delta |> scale -1)
+                        |> (\size -> add size (Math.Vector2.setX 0 delta))
+                , position = add wp.position (Math.Vector2.setY 0 delta)
+            }
 
         TopRight ->
-            Array.set ix
-                { wp
-                    | size =
-                        add wp.size (Math.Vector2.setX 0 delta |> scale -1)
-                            |> (\size -> add size (Math.Vector2.setY 0 delta))
-                    , position = add wp.position (Math.Vector2.setX 0 delta)
-                }
-                windows
+            { wp
+                | size =
+                    add wp.size (Math.Vector2.setX 0 delta |> scale -1)
+                        |> (\size -> add size (Math.Vector2.setY 0 delta))
+                , position = add wp.position (Math.Vector2.setX 0 delta)
+            }
 
         TopLeft ->
-            Array.set ix
-                { wp
-                    | size = add wp.size (delta |> scale -1)
-                    , position = add wp.position delta
-                }
-                windows
+            { wp
+                | size = add wp.size (delta |> scale -1)
+                , position = add wp.position delta
+            }
+    )
+        |> (\w -> Array.set ix w windows)
 
 
 resizer : (Msg -> msg) -> Corner -> List (Attribute msg) -> String -> Int -> Element msg
