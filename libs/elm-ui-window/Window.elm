@@ -60,7 +60,7 @@ type Msg
     = TrackWindow Int
     | ResizeWindow Int Corner
     | StopTrackWindow
-    | MouseMove Float Float
+    | MouseMove Vec2
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -75,11 +75,8 @@ update msg model =
         StopTrackWindow ->
             ( { model | drag = None }, Cmd.none )
 
-        MouseMove x y ->
+        MouseMove mp ->
             let
-                mp =
-                    vec2 x y
-
                 delta =
                     sub mp model.mousePosition
             in
@@ -351,10 +348,10 @@ view toMsg model windowElements =
          , onMouseUp (toMsg StopTrackWindow)
          , htmlAttribute
             (Html.Events.on "mousemove"
-                (D.map2 MouseMove
+                (D.map2 vec2
                     (D.field "clientX" D.float)
                     (D.field "clientY" D.float)
-                    |> D.map toMsg
+                    |> D.map (toMsg << MouseMove)
                 )
             )
          ]
