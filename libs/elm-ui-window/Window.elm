@@ -27,7 +27,7 @@ type Corner
     | TopLeft
 
 
-type Dragging
+type Drag
     = None
     | Reszie Int Corner
     | Move Int
@@ -35,15 +35,15 @@ type Dragging
 
 type alias Model =
     { windows : Array Window
-    , isDragging : Dragging
+    , drag : Drag
     , mousePosition : Vec2
     }
 
 
-init : List ( a, b ) -> { windows : Array a, isDragging : Dragging, mousePosition : Vec2 }
+init : List ( Window, b ) -> Model
 init windowElements =
     { windows = Array.fromList <| List.map Tuple.first windowElements
-    , isDragging = None
+    , drag = None
     , mousePosition = vec2 0 0
     }
 
@@ -51,7 +51,7 @@ init windowElements =
 empty : Model
 empty =
     { windows = Array.empty
-    , isDragging = None
+    , drag = None
     , mousePosition = vec2 0 0
     }
 
@@ -67,13 +67,13 @@ update : Msg -> Model -> ( Model, Cmd msg )
 update msg model =
     case msg of
         ResizeWindow ix dir ->
-            ( { model | isDragging = Reszie ix dir }, Cmd.none )
+            ( { model | drag = Reszie ix dir }, Cmd.none )
 
         TrackWindow ix ->
-            ( { model | isDragging = Move ix }, Cmd.none )
+            ( { model | drag = Move ix }, Cmd.none )
 
         StopTrackWindow ->
-            ( { model | isDragging = None }, Cmd.none )
+            ( { model | drag = None }, Cmd.none )
 
         MouseMove x y ->
             let
@@ -97,7 +97,7 @@ update msg model =
 
 updateWindows : Model -> a -> Vec2 -> Array Window
 updateWindows model _ delta =
-    case model.isDragging of
+    case model.drag of
         None ->
             model.windows
 
@@ -315,7 +315,7 @@ viewElement toMsg model ix ( position, content ) =
                     ([ width fill
                      , height fill
                      ]
-                        ++ userSelect (model.isDragging == None)
+                        ++ userSelect (model.drag == None)
                     )
                     content
                 ]
