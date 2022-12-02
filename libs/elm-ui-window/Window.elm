@@ -4,7 +4,7 @@ import Array exposing (Array)
 import Element exposing (Attribute, Element, clip, column, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, px, row, width)
 import Element.Border
 import Element.Events exposing (onMouseDown, onMouseUp)
-import Html.Attributes
+import Html.Attributes exposing (style)
 import Html.Events
 import Json.Decode as D
 import Math.Vector2 exposing (Vec2, add, getX, getY, scale, sub, vec2)
@@ -196,17 +196,52 @@ resizer toMsg corner attrs c ix =
         Element.none
 
 
+
+--
+
+
 cursor : String -> Attribute msg
 cursor c =
     htmlAttribute (Html.Attributes.style "cursor" c)
+
+
+pointerEventsNone : Attribute msg
+pointerEventsNone =
+    htmlAttribute (Html.Attributes.style "pointer-events" "none")
+
+
+pointerEventsAuto : Attribute msg
+pointerEventsAuto =
+    htmlAttribute (Html.Attributes.style "pointer-events" "auto")
+
+
+userSelect : Bool -> List (Element.Attribute msg)
+userSelect val =
+    if val then
+        [ pointerEventsAuto
+        ]
+
+    else
+        [ pointerEventsNone
+        , Element.htmlAttribute (style "user-select" "none")
+        , Element.htmlAttribute (style "-ms-user-select" "none")
+        , Element.htmlAttribute (style "-moz-user-select" "none")
+        , Element.htmlAttribute (style "-webkit-user-select" "none")
+        , Element.htmlAttribute (style "-webkit-touch-callout" "none")
+        ]
 
 
 
 -- View
 
 
-viewElement : (Msg -> msg) -> Int -> ( Window, Element msg ) -> Element.Attribute msg
-viewElement toMsg ix ( position, content ) =
+viewElement :
+    (Msg -> msg)
+    -> Model
+    -> Int
+    -> ( Window, Element msg )
+    -> Element.Attribute msg
+viewElement toMsg model ix ( position, content ) =
     let
         bw =
             3
@@ -276,12 +311,18 @@ viewElement toMsg ix ( position, content ) =
                     , onMouseDown (toMsg <| TrackWindow ix)
                     ]
                     []
-                , content
+                , el
+                    ([ width fill
+                     , height fill
+                     ]
+                        ++ userSelect (model.isDragging == None)
+                    )
+                    content
                 ]
         )
 
 
-view : (Msg -> msg) -> { a | windows : Array Window } -> List ( c, Element msg ) -> Element msg
+view : (Msg -> msg) -> Model -> List ( c, Element msg ) -> Element msg
 view toMsg model windowElements =
     el
         ([ width fill
@@ -302,7 +343,7 @@ view toMsg model windowElements =
         Element.none
 
 
-renderWindows : (Msg -> msg) -> { a | windows : Array Window } -> List ( c, Element msg ) -> List (Attribute msg)
+renderWindows : (Msg -> msg) -> Model -> List ( c, Element msg ) -> List (Attribute msg)
 renderWindows toMsg model windowElements =
     let
         zipped =
@@ -311,4 +352,4 @@ renderWindows toMsg model windowElements =
                 (Array.toList model.windows)
                 (List.map Tuple.second windowElements)
     in
-    List.indexedMap (viewElement toMsg) zipped
+    List.indexedMap (viewElement toMsg model) zipped
