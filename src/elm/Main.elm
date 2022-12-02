@@ -2,11 +2,13 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (Element, alignBottom, centerX, centerY, el, fill, height, padding, width)
+import Element exposing (Element, alignBottom, centerX, centerY, el, fill, height, html, htmlAttribute, padding, width)
 import Element.Font
+import Html
+import Html.Attributes
 import Json.Decode as D exposing (Decoder, Value)
 import Math.Vector2 exposing (vec2)
-import UI exposing (button, col, root, text)
+import UI exposing (col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 import Window exposing (Window)
@@ -201,19 +203,37 @@ windowElements model =
         , size = vec2 100 100
         }
       , col [ centerX, centerY ]
-            [ el [ alignBottom, centerX ]
-                (button
+            [ el
+                [ alignBottom
+                , centerX
+                ]
+                (UI.buttonWith
                     (if model.settings.theme == Light then
-                        "☽"
+                        fa "space-station-moon-construction"
 
                      else
-                        "☼"
+                        fa "starship-freighter"
                     )
                     ToggleAppereance
                 )
             ]
       )
     ]
+
+
+class : String -> Element.Attribute msg
+class =
+    htmlAttribute << Html.Attributes.class
+
+
+fa : String -> Element msg
+fa icon =
+    html
+        (Html.i
+            [ Html.Attributes.class <| "fa-sharp fa-solid " ++ "fa-" ++ icon
+            ]
+            []
+        )
 
 
 getMessage : Message -> Element.Element Msg

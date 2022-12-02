@@ -1,4 +1,4 @@
-module UI exposing (UI, UiContext, button, center, col, colors, root, row, text)
+module UI exposing (UI, UiContext, button, buttonWith, center, col, colors, root, row, text)
 
 import Element exposing (..)
 import Element.Background
