@@ -81,8 +81,7 @@ colors =
 buttonWith : Element msg -> msg -> Element msg
 buttonWith label msg =
     Element.Input.button
-        [ Element.Border.width 1
-        , Element.Border.rounded 5
+        [ Element.Border.width 3
         , width (shrink |> minimum 25)
         , paddingXY 14 11
         ]

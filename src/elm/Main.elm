@@ -130,7 +130,6 @@ type Msg
     | ToggleAppereance
     | UpdatePrefersColorScheme Appereance
     | GotError String
-    | CloseMessage Int
     | WindowMsg Window.Msg
 
 
@@ -143,11 +142,8 @@ update msg model =
                         ( { model | windowModel = wm }, wcmds )
                    )
 
-        CloseMessage _ ->
-            Debug.todo "Implement CloseMessage"
-
         GotError _ ->
-            Debug.todo "Implement GotError"
+            ( model, Cmd.none )
 
         UpdatePrefersColorScheme scheme ->
             ( { model | settings = model.settings |> (\s -> { s | theme = scheme }) }, Cmd.none )

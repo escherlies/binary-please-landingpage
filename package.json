@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "parcel build --target embed",
+    "build": "parcel build --target app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "source": "src/index.html",
@@ -22,8 +22,12 @@
     "parcel": "^2.7.0"
   },
   "targets": {
+    "app": {
+      "source": "src/index.html",
+      "distDir": "./build"
+    },
     "embed": {
-      "source": "src/index.js",
+      "source": "src/index.ts",
       "distDir": "./build"
     }
   }
