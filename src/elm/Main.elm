@@ -2,9 +2,12 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (el, fill, height, padding, width)
+import Element exposing (clip, el, fill, height, htmlAttribute, padding, px, row, width)
+import Element.Border
+import Element.Events exposing (onMouseDown, onMouseUp)
+import Html.Events
 import Json.Decode as D exposing (Decoder, Value)
-import UI exposing (..)
+import UI exposing (button, center, col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 
@@ -75,12 +78,26 @@ type Message
     = Error String
 
 
+type alias Position =
+    { x : Float
+    , y : Float
+    }
+
+
+setPosition : Float -> Float -> Position
+setPosition x y =
+    { x = x, y = y }
+
+
 type alias Model =
     { counter : Int
     , messages : List Message
+    , mousePosition : Position
+    , windowPosition : Position
     , settings :
         { theme : Appereance
         }
+    , isDragging : Bool
     }
 
 
@@ -91,27 +108,26 @@ init fd =
             fd
                 |> D.decodeValue
                     flagsDecoder
-    in
-    case fr of
-        Ok f ->
+
+        withF f =
             ( { counter = 0
               , messages = []
               , settings =
                     { theme = f.prefersColorScheme
                     }
+              , mousePosition = { x = 0, y = 0 }
+              , windowPosition = { x = 0, y = 0 }
+              , isDragging = False
               }
             , Cmd.none
             )
+    in
+    case fr of
+        Ok f ->
+            withF f
 
         Err _ ->
-            ( { counter = 0
-              , messages = []
-              , settings =
-                    { theme = Light
-                    }
-              }
-            , Cmd.none
-            )
+            withF { prefersColorScheme = Light }
 
 
 flagsDecoder : Decoder Flags
@@ -128,16 +144,49 @@ type Msg
     | UpdatePrefersColorScheme Appereance
     | GotError String
     | CloseMessage Int
+    | TrackWindow
+    | StopTrackWindow
+    | MouseMove Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        CloseMessage index ->
-            ( model, Cmd.none )
+        MouseMove x y ->
+            let
+                mp =
+                    setPosition x y
 
-        GotError s ->
-            ( model, Cmd.none )
+                delta =
+                    { x = mp.x - model.mousePosition.x
+                    , y = mp.y - model.mousePosition.y
+                    }
+            in
+            ( { model
+                | mousePosition = mp
+                , windowPosition =
+                    if model.isDragging then
+                        { x = model.windowPosition.x + delta.x
+                        , y = model.windowPosition.y + delta.y
+                        }
+
+                    else
+                        model.windowPosition
+              }
+            , Cmd.none
+            )
+
+        TrackWindow ->
+            ( { model | isDragging = True }, Cmd.none )
+
+        StopTrackWindow ->
+            ( { model | isDragging = False }, Cmd.none )
+
+        CloseMessage _ ->
+            Debug.todo "Implement CloseMessage"
+
+        GotError _ ->
+            Debug.todo "Implement GotError"
 
         UpdatePrefersColorScheme scheme ->
             ( { model | settings = model.settings |> (\s -> { s | theme = scheme }) }, Cmd.none )
@@ -170,22 +219,50 @@ view model =
             (col
                 [ width fill
                 , height fill
+                , clip
                 , padding 20
+                , onMouseUp StopTrackWindow
+                , htmlAttribute
+                    (Html.Events.on "mousemove"
+                        (D.map2 MouseMove
+                            (D.field "clientX" D.float)
+                            (D.field "clientY" D.float)
+                        )
+                    )
                 , Element.inFront
                     (col
                         [ width fill
                         ]
                         (List.map getMessage model.messages)
                     )
-                ]
-                [ col center
-                    [ row
-                        [ button "-" Decrement
-                        , el [ Element.centerX ] <| text (String.fromInt model.counter)
-                        , button "+" Increment
+                , Element.inFront
+                    (el
+                        [ Element.moveRight model.windowPosition.x
+                        , Element.moveDown model.windowPosition.y
                         ]
-                    ]
-                , col [ Element.centerX ]
+                     <|
+                        col
+                            (center
+                                ++ [ Element.Border.width 3
+                                   , width (px 300)
+                                   , onMouseDown TrackWindow
+                                   ]
+                            )
+                            [ row
+                                [ height (px 42)
+                                , width fill
+                                , Element.Border.width 3
+                                ]
+                                []
+                            , row
+                                [ height (px 200)
+                                , width fill
+                                ]
+                                []
+                            ]
+                    )
+                ]
+                [ col [ Element.centerX ]
                     [ el [ Element.alignBottom, Element.centerX ]
                         (button
                             (if model.settings.theme == Light then
