@@ -7,7 +7,7 @@ import Element.Events exposing (onMouseDown, onMouseUp)
 import Html.Attributes exposing (style)
 import Html.Events
 import Json.Decode as D
-import Math.Vector2 exposing (Vec2, add, getX, getY, scale, sub, vec2)
+import Math.Vector2 exposing (Vec2, add, getX, getY, scale, setX, setY, sub, vec2)
 
 
 type alias Window =
@@ -135,24 +135,24 @@ handleRezise ix wp corner delta windows =
     (case corner of
         Bottom ->
             { wp
-                | size = add wp.size (Math.Vector2.setX 0 delta)
+                | size = add wp.size (setX 0 delta)
             }
 
         Top ->
             { wp
-                | size = add wp.size (Math.Vector2.setX 0 delta |> scale -1)
-                , position = add wp.position (Math.Vector2.setX 0 delta)
+                | size = add wp.size (setX 0 delta |> scale -1)
+                , position = add wp.position (setX 0 delta)
             }
 
         Right ->
             { wp
-                | size = add wp.size (Math.Vector2.setY 0 delta)
+                | size = add wp.size (setY 0 delta)
             }
 
         Left ->
             { wp
-                | size = add wp.size (Math.Vector2.setY 0 delta |> scale -1)
-                , position = add wp.position (Math.Vector2.setY 0 delta)
+                | size = add wp.size (setY 0 delta |> scale -1)
+                , position = add wp.position (setY 0 delta)
             }
 
         BottomRight ->
@@ -163,17 +163,17 @@ handleRezise ix wp corner delta windows =
         BottomLeft ->
             { wp
                 | size =
-                    add wp.size (Math.Vector2.setY 0 delta |> scale -1)
-                        |> (\size -> add size (Math.Vector2.setX 0 delta))
-                , position = add wp.position (Math.Vector2.setY 0 delta)
+                    add wp.size (setY 0 delta |> scale -1)
+                        |> (\size -> add size (setX 0 delta))
+                , position = add wp.position (setY 0 delta)
             }
 
         TopRight ->
             { wp
                 | size =
-                    add wp.size (Math.Vector2.setX 0 delta |> scale -1)
-                        |> (\size -> add size (Math.Vector2.setY 0 delta))
-                , position = add wp.position (Math.Vector2.setX 0 delta)
+                    add wp.size (setX 0 delta |> scale -1)
+                        |> (\size -> add size (setY 0 delta))
+                , position = add wp.position (setX 0 delta)
             }
 
         TopLeft ->
@@ -182,6 +182,26 @@ handleRezise ix wp corner delta windows =
                 , position = add wp.position delta
             }
     )
+        |> (\w ->
+                if getX w.size < 100 then
+                    { w
+                        | size = setX 100 w.size
+                        , position = setX (getX wp.position) w.position
+                    }
+
+                else
+                    w
+           )
+        |> (\w ->
+                if getY w.size < 100 then
+                    { w
+                        | size = setY 100 w.size
+                        , position = setY (getY wp.position) w.position
+                    }
+
+                else
+                    w
+           )
         |> (\w -> Array.set ix w windows)
 
 
