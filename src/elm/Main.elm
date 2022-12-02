@@ -1,14 +1,11 @@
 port module Main exposing (..)
 
-import Array
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (Element, clip, el, fill, height, htmlAttribute, padding, width)
-import Element.Events exposing (onMouseUp)
+import Element exposing (Element, alignBottom, centerX, centerY, clip, el, fill, height, padding, width)
 import Element.Font
-import Html.Events
 import Json.Decode as D exposing (Decoder, Value)
-import Math.Vector2 exposing (Vec2, sub, vec2)
+import Math.Vector2 exposing (vec2)
 import UI exposing (button, col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
@@ -84,7 +81,6 @@ type Message
 type alias Model =
     { counter : Int
     , messages : List Message
-    , mousePosition : Vec2
     , settings :
         { theme : Appereance
         }
@@ -107,9 +103,9 @@ init fd =
               , settings =
                     { theme = f.prefersColorScheme
                     }
-              , mousePosition = vec2 0 0
-              , windowModel = Window.init windowElements
+              , windowModel = Window.empty
               }
+                |> (\m -> { m | windowModel = Window.init (windowElements m) })
             , Cmd.none
             )
     in
@@ -135,7 +131,6 @@ type Msg
     | UpdatePrefersColorScheme Appereance
     | GotError String
     | CloseMessage Int
-    | MouseMove Float Float
     | WindowMsg Window.Msg
 
 
@@ -147,21 +142,6 @@ update msg model =
                 |> (\( wm, wcmds ) ->
                         ( { model | windowModel = wm }, wcmds )
                    )
-
-        MouseMove x y ->
-            let
-                mp =
-                    vec2 x y
-
-                delta =
-                    sub mp model.mousePosition
-            in
-            ( { model
-                | mousePosition = mp
-                , windowModel = Window.updateWindows model.windowModel mp delta
-              }
-            , Cmd.none
-            )
 
         CloseMessage _ ->
             Debug.todo "Implement CloseMessage"
@@ -197,65 +177,46 @@ view model =
     { title = "Binary Please"
     , body =
         [ root (getContext model)
-            (col
-                ([ width fill
-                 , height fill
-                 , clip
-                 , padding 20
-                 , onMouseUp (WindowMsg Window.StopTrackWindow)
-                 , htmlAttribute
-                    (Html.Events.on "mousemove"
-                        (D.map2 MouseMove
-                            (D.field "clientX" D.float)
-                            (D.field "clientY" D.float)
-                        )
-                    )
-                 , Element.inFront
+            (el
+                [ width fill
+                , height fill
+                , clip
+                , padding 20
+                , Element.inFront
                     (col
                         [ width fill
                         ]
                         (List.map getMessage model.messages)
                     )
-                 ]
-                    ++ renderWindows model
-                )
-                [ col [ Element.centerX ]
-                    [ el [ Element.alignBottom, Element.centerX ]
-                        (button
-                            (if model.settings.theme == Light then
-                                "☽"
-
-                             else
-                                "☼"
-                            )
-                            ToggleAppereance
-                        )
-                    ]
                 ]
+                (Window.view WindowMsg model.windowModel (windowElements model))
             )
         ]
     }
 
 
-renderWindows : Model -> List (Element.Attribute Msg)
-renderWindows model =
-    let
-        foo =
-            List.map2
-                Tuple.pair
-                (Array.toList model.windowModel.windows)
-                (List.map Tuple.second windowElements)
-    in
-    List.indexedMap Window.view foo
-        |> List.map (Element.mapAttribute WindowMsg)
-
-
-windowElements : List ( Window, Element msg )
-windowElements =
+windowElements : Model -> List ( Window, Element Msg )
+windowElements model =
     [ ( { position = vec2 300 300
         , size = vec2 320 240
         }
-      , el [ Element.Font.bold, Element.centerX, Element.centerY ] (text "Content")
+      , el [ Element.Font.bold, centerX, centerY ] (text "Content")
+      )
+    , ( { position = vec2 50 50
+        , size = vec2 100 100
+        }
+      , col [ centerX, centerY ]
+            [ el [ alignBottom, centerX ]
+                (button
+                    (if model.settings.theme == Light then
+                        "☽"
+
+                     else
+                        "☼"
+                    )
+                    ToggleAppereance
+                )
+            ]
       )
     ]
 

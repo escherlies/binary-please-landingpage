@@ -1,11 +1,13 @@
 module Window exposing (..)
 
 import Array exposing (Array)
-import Element exposing (Attribute, Element, column, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, px, row, width)
+import Element exposing (Attribute, Element, clip, column, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, px, row, width)
 import Element.Border
-import Element.Events exposing (onMouseDown)
+import Element.Events exposing (onMouseDown, onMouseUp)
 import Html.Attributes
-import Math.Vector2 exposing (Vec2, add, getX, getY, scale)
+import Html.Events
+import Json.Decode as D
+import Math.Vector2 exposing (Vec2, add, getX, getY, scale, sub, vec2)
 
 
 type alias Window =
@@ -34,13 +36,23 @@ type Dragging
 type alias Model =
     { windows : Array Window
     , isDragging : Dragging
+    , mousePosition : Vec2
     }
 
 
-init : List ( a, b ) -> { windows : Array a, isDragging : Dragging }
+init : List ( a, b ) -> { windows : Array a, isDragging : Dragging, mousePosition : Vec2 }
 init windowElements =
     { windows = Array.fromList <| List.map Tuple.first windowElements
     , isDragging = None
+    , mousePosition = vec2 0 0
+    }
+
+
+empty : Model
+empty =
+    { windows = Array.empty
+    , isDragging = None
+    , mousePosition = vec2 0 0
     }
 
 
@@ -48,6 +60,7 @@ type Msg
     = TrackWindow Int
     | ResizeWindow Int Corner
     | StopTrackWindow
+    | MouseMove Float Float
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -62,10 +75,24 @@ update msg model =
         StopTrackWindow ->
             ( { model | isDragging = None }, Cmd.none )
 
+        MouseMove x y ->
+            let
+                mp =
+                    vec2 x y
+
+                delta =
+                    sub mp model.mousePosition
+            in
+            ( { model
+                | mousePosition = mp
+                , windows = updateWindows_ model mp delta
+              }
+            , Cmd.none
+            )
+
 
 
 -- Handle moving and resizing
--- TODO Join mouse position
 
 
 updateWindows : Model -> a -> Vec2 -> Model
@@ -174,10 +201,10 @@ handleRezise ix wp corner delta windows =
                 windows
 
 
-resizer : Corner -> List (Attribute Msg) -> String -> Int -> Element Msg
-resizer corner attrs c ix =
+resizer : (Msg -> msg) -> Corner -> List (Attribute msg) -> String -> Int -> Element msg
+resizer toMsg corner attrs c ix =
     el
-        ([ onMouseDown (ResizeWindow ix corner)
+        ([ onMouseDown (toMsg <| ResizeWindow ix corner)
          , cursor c
          ]
             ++ attrs
@@ -194,8 +221,8 @@ cursor c =
 -- View
 
 
-view : Int -> ( Window, Element Msg ) -> Element.Attribute Msg
-view ix ( position, content ) =
+viewElement : (Msg -> msg) -> Int -> ( Window, Element msg ) -> Element.Attribute msg
+viewElement toMsg ix ( position, content ) =
     let
         bw =
             3
@@ -213,7 +240,8 @@ view ix ( position, content ) =
             , height (px <| round <| getY position.size)
             , width (px <| round <| getX position.size)
             , Element.onLeft
-                (resizer Left
+                (resizer toMsg
+                    Left
                     [ height fill
                     , width (px rs)
                     , moveRight rs
@@ -222,7 +250,8 @@ view ix ( position, content ) =
                     ix
                 )
             , Element.onRight
-                (resizer Right
+                (resizer toMsg
+                    Right
                     [ height fill
                     , width (px rs)
                     , moveLeft rs
@@ -232,16 +261,16 @@ view ix ( position, content ) =
                 )
             , Element.above
                 (row [ width fill, moveDown (bw + overhang) ]
-                    [ resizer TopLeft [ height (px rs), width (px rs) ] "nw-resize" ix
-                    , resizer Top [ height (px rs), width fill ] "ns-resize" ix
-                    , resizer TopRight [ height (px rs), width (px rs) ] "ne-resize" ix
+                    [ resizer toMsg TopLeft [ height (px rs), width (px rs) ] "nw-resize" ix
+                    , resizer toMsg Top [ height (px rs), width fill ] "ns-resize" ix
+                    , resizer toMsg TopRight [ height (px rs), width (px rs) ] "ne-resize" ix
                     ]
                 )
             , Element.below
                 (row [ width fill, moveUp (bw + overhang) ]
-                    [ resizer BottomLeft [ height (px rs), width (px rs) ] "sw-resize" ix
-                    , resizer Bottom [ height (px rs), width fill ] "ns-resize" ix
-                    , resizer BottomRight [ height (px rs), width (px rs) ] "se-resize" ix
+                    [ resizer toMsg BottomLeft [ height (px rs), width (px rs) ] "sw-resize" ix
+                    , resizer toMsg Bottom [ height (px rs), width fill ] "ns-resize" ix
+                    , resizer toMsg BottomRight [ height (px rs), width (px rs) ] "se-resize" ix
                     ]
                 )
             ]
@@ -260,9 +289,42 @@ view ix ( position, content ) =
                         , right = 0
                         , bottom = 3
                         }
-                    , onMouseDown (TrackWindow ix)
+                    , onMouseDown (toMsg <| TrackWindow ix)
                     ]
                     []
                 , content
                 ]
         )
+
+
+view : (Msg -> msg) -> { a | windows : Array Window } -> List ( c, Element msg ) -> Element msg
+view toMsg model windowElements =
+    el
+        ([ width fill
+         , height fill
+         , clip
+         , onMouseUp (toMsg StopTrackWindow)
+         , htmlAttribute
+            (Html.Events.on "mousemove"
+                (D.map2 MouseMove
+                    (D.field "clientX" D.float)
+                    (D.field "clientY" D.float)
+                    |> D.map toMsg
+                )
+            )
+         ]
+            ++ renderWindows toMsg model windowElements
+        )
+        Element.none
+
+
+renderWindows : (Msg -> msg) -> { a | windows : Array Window } -> List ( c, Element msg ) -> List (Attribute msg)
+renderWindows toMsg model windowElements =
+    let
+        zipped =
+            List.map2
+                Tuple.pair
+                (Array.toList model.windows)
+                (List.map Tuple.second windowElements)
+    in
+    List.indexedMap (viewElement toMsg) zipped
