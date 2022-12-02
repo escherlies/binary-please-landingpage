@@ -8,6 +8,7 @@ import Element.Border
 import Element.Events exposing (onMouseDown, onMouseUp)
 import Html.Events
 import Json.Decode as D exposing (Decoder, Value)
+import Math.Vector2 exposing (Vec2, add, getX, getY, sub, vec2)
 import Maybe.Extra
 import UI exposing (button, center, col, root, text)
 import UI.Color
@@ -80,22 +81,16 @@ type Message
     = Error String
 
 
-type alias Position =
-    { x : Float
-    , y : Float
+type alias Window =
+    { position : Vec2
     }
-
-
-setPosition : Float -> Float -> Position
-setPosition x y =
-    { x = x, y = y }
 
 
 type alias Model =
     { counter : Int
     , messages : List Message
-    , mousePosition : Position
-    , windows : Array Position
+    , mousePosition : Vec2
+    , windows : Array Window
     , settings :
         { theme : Appereance
         }
@@ -118,7 +113,7 @@ init fd =
               , settings =
                     { theme = f.prefersColorScheme
                     }
-              , mousePosition = { x = 0, y = 0 }
+              , mousePosition = vec2 0 0
               , windows = Array.fromList <| List.map Tuple.first windows
               , isDragging = Nothing
               }
@@ -158,12 +153,10 @@ update msg model =
         MouseMove x y ->
             let
                 mp =
-                    setPosition x y
+                    vec2 x y
 
                 delta =
-                    { x = mp.x - model.mousePosition.x
-                    , y = mp.y - model.mousePosition.y
-                    }
+                    sub mp model.mousePosition
             in
             ( { model
                 | mousePosition = mp
@@ -178,13 +171,12 @@ update msg model =
                             case cw of
                                 Just wp ->
                                     Array.set ix
-                                        { x = wp.x + delta.x
-                                        , y = wp.y + delta.y
-                                        }
+                                        { wp | position = add wp.position delta }
                                         model.windows
 
                                 Nothing ->
-                                    Array.push mp model.windows
+                                    -- Should never happen
+                                    model.windows
                         )
                         model.isDragging
               }
@@ -280,24 +272,25 @@ renderWindows model =
     List.indexedMap rendewWindow foo
 
 
+rendewWindow : Int -> ( Window, Element Msg ) -> Element.Attribute Msg
 rendewWindow ix ( position, content ) =
     Element.inFront
         (el
-            [ Element.moveRight position.x
-            , Element.moveDown position.y
+            [ Element.moveRight (getX position.position)
+            , Element.moveDown (getY position.position)
             ]
          <|
             col
                 (center
                     ++ [ Element.Border.width 3
                        , width (px 300)
-                       , onMouseDown (TrackWindow ix)
                        ]
                 )
                 [ row
                     [ height (px 42)
                     , width fill
                     , Element.Border.width 3
+                    , onMouseDown (TrackWindow ix)
                     ]
                     []
                 , row
@@ -309,9 +302,9 @@ rendewWindow ix ( position, content ) =
         )
 
 
-windows : List ( Position, Element Msg )
+windows : List ( Window, Element Msg )
 windows =
-    [ ( setPosition 300 300, text "Content" )
+    [ ( { position = vec2 300 300 }, text "Content" )
     ]
 
 
