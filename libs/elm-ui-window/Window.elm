@@ -63,6 +63,11 @@ update msg model =
             ( { model | isDragging = None }, Cmd.none )
 
 
+
+-- Handle moving and resizing
+-- TODO Join mouse position
+
+
 updateWindows : Model -> a -> Vec2 -> Model
 updateWindows m mp delta =
     { m
@@ -169,8 +174,8 @@ handleRezise ix wp corner delta windows =
                 windows
 
 
-bc : Corner -> List (Attribute Msg) -> String -> Int -> Element Msg
-bc corner attrs c ix =
+resizer : Corner -> List (Attribute Msg) -> String -> Int -> Element Msg
+resizer corner attrs c ix =
     el
         ([ onMouseDown (ResizeWindow ix corner)
          , cursor c
@@ -180,8 +185,17 @@ bc corner attrs c ix =
         Element.none
 
 
-rendewWindow : Int -> ( Window, Element Msg ) -> Element.Attribute Msg
-rendewWindow ix ( position, content ) =
+cursor : String -> Attribute msg
+cursor c =
+    htmlAttribute (Html.Attributes.style "cursor" c)
+
+
+
+-- View
+
+
+view : Int -> ( Window, Element Msg ) -> Element.Attribute Msg
+view ix ( position, content ) =
     let
         bw =
             3
@@ -199,7 +213,7 @@ rendewWindow ix ( position, content ) =
             , height (px <| round <| getY position.size)
             , width (px <| round <| getX position.size)
             , Element.onLeft
-                (bc Left
+                (resizer Left
                     [ height fill
                     , width (px rs)
                     , moveRight rs
@@ -208,7 +222,7 @@ rendewWindow ix ( position, content ) =
                     ix
                 )
             , Element.onRight
-                (bc Right
+                (resizer Right
                     [ height fill
                     , width (px rs)
                     , moveLeft rs
@@ -218,16 +232,16 @@ rendewWindow ix ( position, content ) =
                 )
             , Element.above
                 (row [ width fill, moveDown (bw + overhang) ]
-                    [ bc TopLeft [ height (px rs), width (px rs) ] "nw-resize" ix
-                    , bc Top [ height (px rs), width fill ] "ns-resize" ix
-                    , bc TopRight [ height (px rs), width (px rs) ] "ne-resize" ix
+                    [ resizer TopLeft [ height (px rs), width (px rs) ] "nw-resize" ix
+                    , resizer Top [ height (px rs), width fill ] "ns-resize" ix
+                    , resizer TopRight [ height (px rs), width (px rs) ] "ne-resize" ix
                     ]
                 )
             , Element.below
                 (row [ width fill, moveUp (bw + overhang) ]
-                    [ bc BottomLeft [ height (px rs), width (px rs) ] "sw-resize" ix
-                    , bc Bottom [ height (px rs), width fill ] "ns-resize" ix
-                    , bc BottomRight [ height (px rs), width (px rs) ] "se-resize" ix
+                    [ resizer BottomLeft [ height (px rs), width (px rs) ] "sw-resize" ix
+                    , resizer Bottom [ height (px rs), width fill ] "ns-resize" ix
+                    , resizer BottomRight [ height (px rs), width (px rs) ] "se-resize" ix
                     ]
                 )
             ]
@@ -252,8 +266,3 @@ rendewWindow ix ( position, content ) =
                 , content
                 ]
         )
-
-
-cursor : String -> Attribute msg
-cursor c =
-    htmlAttribute (Html.Attributes.style "cursor" c)

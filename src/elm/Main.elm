@@ -246,7 +246,7 @@ renderWindows model =
                 (Array.toList model.windowModel.windows)
                 (List.map Tuple.second windowElements)
     in
-    List.indexedMap Window.rendewWindow foo
+    List.indexedMap Window.view foo
         |> List.map (Element.mapAttribute WindowMsg)
 
 
