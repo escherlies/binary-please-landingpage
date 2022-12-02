@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (Element, alignBottom, centerX, centerY, clip, el, fill, height, padding, width)
+import Element exposing (Element, alignBottom, centerX, centerY, el, fill, height, padding, width)
 import Element.Font
 import Json.Decode as D exposing (Decoder, Value)
 import Math.Vector2 exposing (vec2)
@@ -180,7 +180,6 @@ view model =
             (el
                 [ width fill
                 , height fill
-                , clip
                 , padding 20
                 , Element.inFront
                     (col

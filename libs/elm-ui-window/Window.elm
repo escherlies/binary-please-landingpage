@@ -85,7 +85,7 @@ update msg model =
             in
             ( { model
                 | mousePosition = mp
-                , windows = updateWindows_ model mp delta
+                , windows = updateWindows model mp delta
               }
             , Cmd.none
             )
@@ -95,16 +95,8 @@ update msg model =
 -- Handle moving and resizing
 
 
-updateWindows : Model -> a -> Vec2 -> Model
-updateWindows m mp delta =
-    { m
-        | windows =
-            updateWindows_ m mp delta
-    }
-
-
-updateWindows_ : Model -> a -> Vec2 -> Array Window
-updateWindows_ model _ delta =
+updateWindows : Model -> a -> Vec2 -> Array Window
+updateWindows model _ delta =
     case model.isDragging of
         None ->
             model.windows
