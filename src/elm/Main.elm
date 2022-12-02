@@ -10,7 +10,7 @@ import Html.Events
 import Json.Decode as D exposing (Decoder, Value)
 import Math.Vector2 exposing (Vec2, add, getX, getY, sub, vec2)
 import Maybe.Extra
-import UI exposing (button, center, col, root, text)
+import UI exposing (button, col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 
@@ -83,6 +83,7 @@ type Message
 
 type alias Window =
     { position : Vec2
+    , size : Vec2
     }
 
 
@@ -278,14 +279,15 @@ rendewWindow ix ( position, content ) =
         (el
             [ Element.moveRight (getX position.position)
             , Element.moveDown (getY position.position)
+            , height (px <| round <| getY position.size)
+            , width (px <| round <| getX position.size)
             ]
          <|
             col
-                (center
-                    ++ [ Element.Border.width 3
-                       , width (px 300)
-                       ]
-                )
+                [ Element.Border.width 3
+                , width fill
+                , height fill
+                ]
                 [ row
                     [ height (px 42)
                     , width fill
@@ -304,7 +306,11 @@ rendewWindow ix ( position, content ) =
 
 windows : List ( Window, Element Msg )
 windows =
-    [ ( { position = vec2 300 300 }, text "Content" )
+    [ ( { position = vec2 300 300
+        , size = vec2 320 240
+        }
+      , text "Content"
+      )
     ]
 
 
