@@ -76,13 +76,9 @@ update msg model =
             ( { model | drag = None }, Cmd.none )
 
         MouseMove mp ->
-            let
-                delta =
-                    sub mp model.mousePosition
-            in
             ( { model
                 | mousePosition = mp
-                , windows = updateWindows model mp delta
+                , windows = updateWindows model mp
               }
             , Cmd.none
             )
@@ -92,8 +88,8 @@ update msg model =
 -- Handle moving and resizing
 
 
-updateWindows : Model -> a -> Vec2 -> Array Window
-updateWindows model _ delta =
+updateWindows : Model -> Vec2 -> Array Window
+updateWindows model mp =
     case model.drag of
         None ->
             model.windows
@@ -102,6 +98,9 @@ updateWindows model _ delta =
             let
                 cw =
                     Array.get ix model.windows
+
+                delta =
+                    sub mp model.mousePosition
             in
             case cw of
                 Just wp ->
@@ -117,6 +116,9 @@ updateWindows model _ delta =
             let
                 cw =
                     Array.get ix model.windows
+
+                delta =
+                    sub mp model.mousePosition
             in
             case cw of
                 Just wp ->
