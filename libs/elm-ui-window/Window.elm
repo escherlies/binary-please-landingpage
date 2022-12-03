@@ -5,6 +5,7 @@ import Element exposing (Attribute, Element, clip, el, fill, height, htmlAttribu
 import Html.Attributes exposing (style)
 import Html.Events exposing (on)
 import Json.Decode as D
+import List.Extra
 import Math.Vector2 exposing (Vec2, add, getX, getY, scale, setX, setY, sub, vec2)
 import Maybe.Extra exposing (unwrap)
 
@@ -34,6 +35,7 @@ type Drag
 
 type alias Model =
     { windows : Array Window
+    , order : List Int
     , drag : Drag
     , mousePosition : Vec2
     , mouseOffset : Vec2
@@ -43,6 +45,7 @@ type alias Model =
 init : List Window -> Model
 init windowElements =
     { windows = Array.fromList windowElements
+    , order = List.range 0 (List.length windowElements - 1)
     , drag = None
     , mousePosition = vec2 0 0
     , mouseOffset = vec2 0 0
@@ -52,6 +55,7 @@ init windowElements =
 empty : Model
 empty =
     { windows = Array.empty
+    , order = []
     , drag = None
     , mousePosition = vec2 0 0
     , mouseOffset = vec2 0 0
@@ -78,6 +82,12 @@ update msg model =
                     unwrap (vec2 0 0)
                         (\w -> sub w.position mp)
                         (Array.get ix model.windows)
+                , order =
+                    model.order
+                        -- Add selected item to end of stack
+                        |> (\zis -> zis ++ [ ix ])
+                        -- Uniq
+                        |> List.Extra.remove ix
               }
             , Cmd.none
             )
@@ -129,15 +139,16 @@ updateWindows model mp =
             in
             case targetWindow of
                 Just wp ->
-                    handleRezise ix wp corner delta model.windows
+                    handleRezise ix wp corner delta
+                        |> (\w -> Array.set ix w model.windows)
 
                 Nothing ->
                     -- Should never happen
                     model.windows
 
 
-handleRezise : Int -> Window -> Corner -> Vec2 -> Array Window -> Array Window
-handleRezise ix wp corner delta windows =
+handleRezise : Int -> Window -> Corner -> Vec2 -> Window
+handleRezise ix wp corner delta =
     (case corner of
         Bottom ->
             { wp
@@ -208,7 +219,6 @@ handleRezise ix wp corner delta windows =
                 else
                     w
            )
-        |> (\w -> Array.set ix w windows)
 
 
 resizer : (Msg -> msg) -> Corner -> List (Attribute msg) -> String -> Int -> Element msg
@@ -395,12 +405,15 @@ view toMsg model windowElements =
                 )
             )
          ]
-            ++ renderWindows toMsg model windowElements
+            ++ (renderWindows toMsg model windowElements
+                    |> List.sortBy Tuple.first
+                    |> List.map Tuple.second
+               )
         )
         Element.none
 
 
-renderWindows : (Msg -> msg) -> Model -> List ( c, Element msg ) -> List (Attribute msg)
+renderWindows : (Msg -> msg) -> Model -> List ( c, Element msg ) -> List ( Int, Attribute msg )
 renderWindows toMsg model windowElements =
     let
         zipped =
@@ -410,3 +423,14 @@ renderWindows toMsg model windowElements =
                 (List.map Tuple.second windowElements)
     in
     List.indexedMap (viewElement toMsg model) zipped
+        |> List.map2 Tuple.pair (getOrder model.order)
+
+
+getOrder : List Int -> List Int
+getOrder listOfIndex =
+    listOfIndex
+        |> List.indexedMap (\position index -> ( position, index ))
+        -- Sort by index so we can zip this with our window elements again
+        |> List.sortBy Tuple.second
+        -- Get position
+        |> List.map Tuple.first
