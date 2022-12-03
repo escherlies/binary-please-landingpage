@@ -1,6 +1,7 @@
 port module Main exposing (..)
 
 import Browser exposing (Document)
+import BrowserWindow exposing (BrowserWindow)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, alignBottom, centerX, centerY, el, fill, height, html, htmlAttribute, row, spacing, width)
 import Element.Border
@@ -10,6 +11,7 @@ import Html
 import Html.Attributes
 import Json.Decode as D exposing (Decoder, Value)
 import Math.Vector2 exposing (vec2)
+import Ports exposing (PortMessage(..))
 import UI exposing (col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
@@ -19,6 +21,7 @@ import Window exposing (Window)
 
 type alias Flags =
     { prefersColorScheme : Appereance
+    , window : BrowserWindow
     }
 
 
@@ -49,6 +52,9 @@ decodePortMessage dv =
                         case tag of
                             "UpdatePrefersColorScheme" ->
                                 D.map UpdatePrefersColorScheme (D.field "value" decodeColorScheme)
+
+                            "UpdateBrowserWindow" ->
+                                D.map (PortMsg << UpdateBrowserWindow) (D.field "value" BrowserWindow.decode)
 
                             other ->
                                 D.fail <| "Unkowm message type" ++ other
@@ -90,6 +96,7 @@ type alias Model =
         { theme : Appereance
         }
     , windowModel : Window.Model
+    , window : { width : Float, height : Float }
     }
 
 
@@ -109,6 +116,7 @@ init fd =
                     { theme = f.prefersColorScheme
                     }
               , windowModel = Window.empty
+              , window = f.window
               }
                 |> (\m -> { m | windowModel = Window.init (windowElements (getContext m) m) })
             , Cmd.none
@@ -119,13 +127,20 @@ init fd =
             withF f
 
         Err _ ->
-            withF { prefersColorScheme = Light }
+            withF
+                { prefersColorScheme = Light
+                , window =
+                    { width = 1024
+                    , height = 768
+                    }
+                }
 
 
 flagsDecoder : Decoder Flags
 flagsDecoder =
-    D.map Flags
+    D.map2 Flags
         (D.field "prefersColorScheme" decodeColorScheme)
+        (D.field "window" BrowserWindow.decode)
 
 
 type Msg
@@ -136,11 +151,15 @@ type Msg
     | UpdatePrefersColorScheme Appereance
     | GotError String
     | WindowMsg Window.Msg
+    | PortMsg Ports.PortMessage
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        PortMsg pm ->
+            handlePortMessages pm model
+
         WindowMsg sm ->
             Window.update sm model.windowModel
                 |> (\( wm, wcmds ) ->
@@ -164,6 +183,13 @@ update msg model =
 
         ToggleAppereance t ->
             ( { model | settings = model.settings |> (\s -> { s | theme = t }) }, Cmd.none )
+
+
+handlePortMessages : PortMessage -> Model -> ( Model, Cmd Msg )
+handlePortMessages pm model =
+    case pm of
+        UpdateBrowserWindow window ->
+            ( { model | window = window }, Cmd.none )
 
 
 view : Model -> Document Msg
@@ -292,4 +318,5 @@ getContext m =
         }
     , lang = De
     , version = 1
+    , window = m.window
     }

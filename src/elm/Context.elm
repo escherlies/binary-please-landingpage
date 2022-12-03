@@ -1,5 +1,6 @@
 module Context exposing (..)
 
+import BrowserWindow exposing (WithBrowserWindow)
 import UI exposing (UiContext)
 import UI.Theme exposing (Appereance(..))
 
@@ -22,13 +23,17 @@ getTranslation { lang } { en, de } =
 
 
 type alias LangContext a =
-    { a | lang : Lang }
+    { a
+        | lang : Lang
+    }
 
 
 {-| Another arbitrary context
 -}
 type alias VersionContext ctx =
-    { ctx | version : Int }
+    { ctx
+        | version : Int
+    }
 
 
 
@@ -37,4 +42,4 @@ type alias VersionContext ctx =
 
 
 type alias Context =
-    UiContext (LangContext (VersionContext {}))
+    WithBrowserWindow (UiContext (LangContext (VersionContext {})))
