@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "parcel build --target app",
+    "build": "parcel build --no-source-maps --target app",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "source": "src/index.html",
