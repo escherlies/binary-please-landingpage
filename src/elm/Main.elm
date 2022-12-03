@@ -13,7 +13,8 @@ import Math.Vector2 exposing (vec2)
 import UI exposing (col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
-import Window exposing (Window, WindowElement)
+import UI.Window exposing (viewElement)
+import Window exposing (Window)
 
 
 type alias Flags =
@@ -109,7 +110,7 @@ init fd =
                     }
               , windowModel = Window.empty
               }
-                |> (\m -> { m | windowModel = Window.init (windowElements m) })
+                |> (\m -> { m | windowModel = Window.init (windowElements (getContext m) m) })
             , Cmd.none
             )
     in
@@ -169,7 +170,11 @@ view : Model -> Document Msg
 view model =
     { title = "Binary Please"
     , body =
-        [ root (getContext model)
+        let
+            ctx =
+                getContext model
+        in
+        [ root ctx
             (el
                 [ width fill
                 , height fill
@@ -180,34 +185,38 @@ view model =
                         (List.map getMessage model.messages)
                     )
                 ]
-                (Window.view WindowMsg model.windowModel (windowElements model))
+                (Window.view WindowMsg model.windowModel (windowElements ctx model))
             )
         ]
     }
 
 
-windowElements : Model -> List ( Window, WindowElement Msg )
-windowElements model =
+windowElements : Context -> Model -> List ( Window, Int -> Element Msg )
+windowElements ctx model =
     [ ( { position = vec2 300 300
         , size = vec2 320 240
         }
-      , { title = text "Title"
-        , content = el [ Element.Font.bold, centerX, centerY ] (text "Content")
-        }
+      , viewElement
+            { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
+            { title = text "Title"
+            , content = el [ Element.Font.bold, centerX, centerY ] (text "Content")
+            }
       )
     , ( { position = vec2 50 50
         , size = vec2 100 100
         }
-      , { title = text "Settings"
-        , content =
-            col [ centerX, centerY ]
-                [ el
-                    [ alignBottom
-                    , centerX
+      , viewElement
+            { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
+            { title = text "Settings"
+            , content =
+                col [ centerX, centerY ]
+                    [ el
+                        [ alignBottom
+                        , centerX
+                        ]
+                        (toggleAppereanceButton model)
                     ]
-                    (toggleAppereanceButton model)
-                ]
-        }
+            }
       )
     ]
 

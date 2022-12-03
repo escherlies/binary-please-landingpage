@@ -1,11 +1,8 @@
 module Window exposing (..)
 
 import Array exposing (Array)
-import Element exposing (Attribute, Element, clip, column, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, padding, px, row, width)
-import Element.Border
-import Element.Color exposing (rgb, rgba)
+import Element exposing (Attribute, Element, clip, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, px, row, width)
 import Element.Events exposing (onMouseDown, onMouseUp)
-import Element.Font
 import Html.Attributes exposing (style)
 import Html.Events
 import Json.Decode as D
@@ -254,19 +251,13 @@ userSelect val =
 -- View
 
 
-{-| A default window element
--}
-type alias WindowElement msg =
-    { title : Element msg, content : Element msg }
-
-
 viewElement :
     (Msg -> msg)
     -> Model
     -> Int
-    -> ( Window, WindowElement msg )
+    -> ( Window, Int -> Element msg )
     -> Element.Attribute msg
-viewElement toMsg model ix ( position, { content, title } ) =
+viewElement toMsg model ix ( position, content ) =
     let
         bw =
             3
@@ -279,11 +270,11 @@ viewElement toMsg model ix ( position, { content, title } ) =
     in
     Element.inFront
         (el
-            [ Element.moveRight (getX position.position)
-            , Element.moveDown (getY position.position)
-            , height (px <| round <| getY position.size)
-            , width (px <| round <| getX position.size)
-            , Element.onLeft
+            ([ Element.moveRight (getX position.position)
+             , Element.moveDown (getY position.position)
+             , height (px <| round <| getY position.size)
+             , width (px <| round <| getX position.size)
+             , Element.onLeft
                 (resizer toMsg
                     Left
                     [ height fill
@@ -293,7 +284,7 @@ viewElement toMsg model ix ( position, { content, title } ) =
                     "ew-resize"
                     ix
                 )
-            , Element.onRight
+             , Element.onRight
                 (resizer toMsg
                     Right
                     [ height fill
@@ -303,62 +294,29 @@ viewElement toMsg model ix ( position, { content, title } ) =
                     "ew-resize"
                     ix
                 )
-            , Element.above
+             , Element.above
                 (row [ width fill, moveDown (bw + overhang) ]
                     [ resizer toMsg TopLeft [ height (px rs), width (px rs) ] "nw-resize" ix
                     , resizer toMsg Top [ height (px rs), width fill ] "ns-resize" ix
                     , resizer toMsg TopRight [ height (px rs), width (px rs) ] "ne-resize" ix
                     ]
                 )
-            , Element.below
+             , Element.below
                 (row [ width fill, moveUp (bw + overhang) ]
                     [ resizer toMsg BottomLeft [ height (px rs), width (px rs) ] "sw-resize" ix
                     , resizer toMsg Bottom [ height (px rs), width fill ] "ns-resize" ix
                     , resizer toMsg BottomRight [ height (px rs), width (px rs) ] "se-resize" ix
                     ]
                 )
-            ]
+             ]
+                ++ userSelect (model.drag == None)
+            )
          <|
-            column
-                [ Element.Border.width 2
-                , width fill
-                , height fill
-                , Element.Border.shadow
-                    { offset = ( 3, 3 )
-                    , blur = 0
-                    , color = rgba 0 0 0 0.3
-                    , size = 0
-                    }
-                ]
-                [ row
-                    ([ height (px 40)
-                     , width fill
-                     , Element.Border.widthEach
-                        { top = 0
-                        , left = 0
-                        , right = 0
-                        , bottom = 2
-                        }
-                     , onMouseDown (toMsg <| TrackWindow ix)
-                     , cursor "move"
-                     , padding 8
-                     , Element.Font.semiBold
-                     ]
-                        ++ userSelect False
-                    )
-                    [ title ]
-                , el
-                    ([ width fill
-                     , height fill
-                     ]
-                        ++ userSelect (model.drag == None)
-                    )
-                    content
-                ]
+            content ix
         )
 
 
-view : (Msg -> msg) -> Model -> List ( c, WindowElement msg ) -> Element msg
+view : (Msg -> msg) -> Model -> List ( c, Int -> Element msg ) -> Element msg
 view toMsg model windowElements =
     el
         ([ width fill
@@ -379,7 +337,7 @@ view toMsg model windowElements =
         Element.none
 
 
-renderWindows : (Msg -> msg) -> Model -> List ( c, WindowElement msg ) -> List (Attribute msg)
+renderWindows : (Msg -> msg) -> Model -> List ( c, Int -> Element msg ) -> List (Attribute msg)
 renderWindows toMsg model windowElements =
     let
         zipped =
