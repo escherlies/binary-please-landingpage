@@ -6,6 +6,7 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (on)
 import Json.Decode as D
 import Math.Vector2 exposing (Vec2, add, getX, getY, scale, setX, setY, sub, vec2)
+import Maybe.Extra exposing (unwrap)
 
 
 type alias Window =
@@ -35,6 +36,7 @@ type alias Model =
     { windows : Array Window
     , drag : Drag
     , mousePosition : Vec2
+    , mouseOffset : Vec2
     }
 
 
@@ -43,6 +45,7 @@ init windowElements =
     { windows = Array.fromList <| List.map Tuple.first windowElements
     , drag = None
     , mousePosition = vec2 0 0
+    , mouseOffset = vec2 0 0
     }
 
 
@@ -51,11 +54,12 @@ empty =
     { windows = Array.empty
     , drag = None
     , mousePosition = vec2 0 0
+    , mouseOffset = vec2 0 0
     }
 
 
 type Msg
-    = TrackWindow Int
+    = TrackWindow Int Vec2
     | ResizeWindow Int Corner
     | StopTrackWindow
     | MouseMove Vec2
@@ -67,8 +71,16 @@ update msg model =
         ResizeWindow ix dir ->
             ( { model | drag = Reszie ix dir }, Cmd.none )
 
-        TrackWindow ix ->
-            ( { model | drag = Move ix }, Cmd.none )
+        TrackWindow ix mp ->
+            ( { model
+                | drag = Move ix
+                , mouseOffset =
+                    unwrap (vec2 0 0)
+                        (\w -> sub w.position mp)
+                        (Array.get ix model.windows)
+              }
+            , Cmd.none
+            )
 
         StopTrackWindow ->
             ( { model | drag = None }, Cmd.none )
@@ -94,16 +106,13 @@ updateWindows model mp =
 
         Move ix ->
             let
-                cw =
+                targetWindow =
                     Array.get ix model.windows
-
-                delta =
-                    sub mp model.mousePosition
             in
-            case cw of
+            case targetWindow of
                 Just wp ->
                     Array.set ix
-                        { wp | position = add wp.position delta }
+                        { wp | position = add mp model.mouseOffset }
                         model.windows
 
                 Nothing ->
@@ -112,13 +121,13 @@ updateWindows model mp =
 
         Reszie ix corner ->
             let
-                cw =
+                targetWindow =
                     Array.get ix model.windows
 
                 delta =
                     sub mp model.mousePosition
             in
-            case cw of
+            case targetWindow of
                 Just wp ->
                     handleRezise ix wp corner delta model.windows
 

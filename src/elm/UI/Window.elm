@@ -6,6 +6,7 @@ import Element.Border
 import Element.Font
 import Html.Events
 import Json.Decode as D
+import Math.Vector2 exposing (Vec2, vec2)
 import UI exposing (UI)
 import Window exposing (cursor, userSelect)
 
@@ -14,7 +15,7 @@ type alias WindowElement msg =
     { title : Element msg, content : Element msg }
 
 
-viewElement : { a | trackWindow : Int -> msg, ui : UI } -> WindowElement msg -> Int -> Element msg
+viewElement : { a | trackWindow : Int -> Vec2 -> msg, ui : UI } -> WindowElement msg -> Int -> Element msg
 viewElement ctx { title, content } ix =
     column
         [ Element.Border.width 2
@@ -39,7 +40,12 @@ viewElement ctx { title, content } ix =
                 }
              , htmlAttribute
                 (Html.Events.on "pointerdown"
-                    (D.succeed (ctx.trackWindow ix))
+                    (D.map (ctx.trackWindow ix)
+                        (D.map2 vec2
+                            (D.field "clientX" D.float)
+                            (D.field "clientY" D.float)
+                        )
+                    )
                 )
              , cursor "move"
              , padding 8

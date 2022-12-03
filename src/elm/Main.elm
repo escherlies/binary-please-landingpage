@@ -220,7 +220,7 @@ windowElements ctx model =
             , size = vec2 320 250
             }
       , viewElement
-            { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
+            { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Binary Please UG"
             , content =
                 column [ centerX, centerY ]
@@ -247,7 +247,7 @@ windowElements ctx model =
             }
             |> Window.move (vec2 -50 -50)
       , viewElement
-            { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
+            { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Settings"
             , content =
                 col [ centerX, centerY ]
@@ -267,7 +267,7 @@ windowElements ctx model =
             |> Window.centerX ctx.window
             |> Window.move (vec2 180 180)
       , viewElement
-            { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
+            { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Projects"
             , content =
                 col [ centerX, centerY, width fill, padding 40 ]
@@ -287,6 +287,11 @@ windowElements ctx model =
             }
       )
     ]
+
+
+trackWindow : Int -> Math.Vector2.Vec2 -> Msg
+trackWindow i v =
+    WindowMsg (Window.TrackWindow i v)
 
 
 toggleAppereanceButton : Model -> Element Msg
