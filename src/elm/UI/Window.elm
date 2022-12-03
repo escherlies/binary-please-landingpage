@@ -1,6 +1,6 @@
 module UI.Window exposing (..)
 
-import Element exposing (Element, column, fill, height, padding, px, row, width)
+import Element exposing (Element, clip, column, el, fill, height, padding, px, row, scrollbars, width)
 import Element.Background
 import Element.Border
 import Element.Events exposing (onMouseDown)
@@ -44,5 +44,12 @@ viewElement ctx { title, content } ix =
                 ++ userSelect False
             )
             [ title ]
-        , content
+        , el
+            [ width fill
+            , height fill
+            , clip
+            , scrollbars
+            ]
+          <|
+            content
         ]

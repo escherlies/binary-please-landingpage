@@ -1,6 +1,6 @@
 module Color exposing (..)
 
-import Color.Internal
+import Color.Internal exposing (Color(..), mapRgb)
 
 
 type alias Color =
@@ -57,3 +57,17 @@ toCssString =
 toHexString : Color -> String
 toHexString =
     Color.Internal.toHexString
+
+
+
+-- Manipulate
+
+
+invert : Color -> Color
+invert =
+    mapRgb (\c -> 1 - c)
+
+
+setAlpha : Float -> Color -> Color
+setAlpha a (Rgba r g b _) =
+    Rgba r g b a

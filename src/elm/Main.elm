@@ -3,7 +3,7 @@ port module Main exposing (..)
 import Browser exposing (Document)
 import BrowserWindow exposing (BrowserWindow)
 import Context exposing (Context, Lang(..))
-import Element exposing (Element, alignBottom, centerX, centerY, el, fill, height, html, htmlAttribute, row, spacing, width)
+import Element exposing (Element, alignBottom, alignTop, centerX, centerY, column, el, fill, height, html, htmlAttribute, padding, paragraph, row, spacing, width)
 import Element.Border
 import Element.Font
 import Element.Input
@@ -16,7 +16,7 @@ import UI exposing (col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 import UI.Window exposing (viewElement)
-import Window exposing (Window)
+import Window exposing (Window, zero)
 
 
 type alias Flags =
@@ -96,7 +96,7 @@ type alias Model =
         { theme : Appereance
         }
     , windowModel : Window.Model
-    , window : { width : Float, height : Float }
+    , window : BrowserWindow
     }
 
 
@@ -129,10 +129,7 @@ init fd =
         Err _ ->
             withF
                 { prefersColorScheme = Light
-                , window =
-                    { width = 1024
-                    , height = 768
-                    }
+                , window = vec2 1024 768
                 }
 
 
@@ -218,18 +215,37 @@ view model =
 
 windowElements : Context -> Model -> List ( Window, Int -> Element Msg )
 windowElements ctx model =
-    [ ( { position = vec2 300 300
-        , size = vec2 320 240
-        }
+    [ ( Window.center ctx.window
+            { position = zero
+            , size = vec2 320 250
+            }
       , viewElement
             { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
             { title = text "Binary Please UG"
-            , content = el [ Element.Font.bold, centerX, centerY ] (text "Next Gen of Software")
+            , content =
+                column [ centerX, centerY ]
+                    [ text "101010101010011000001010101010101011"
+                    , text "101010110100110010101010101010101101"
+                    , text "010101010101010101010101010100101010"
+                    , text "101001010110101001010101010101010100"
+                    , text "010101010101010101011010100101011001"
+                    , text "010101101010101010101010101010100101"
+                    , text "100101011Next1Gen11Software110101001"
+                    , text "101001010101011010100110101010101010"
+                    , text "101010101010011000001010101010101011"
+                    , text "101000010111010111010110100010101011"
+                    , text "101000101010101001011001010101010101"
+                    , text "101001100110101010101101010101011011"
+                    , text "011001101010100101010101010101010101"
+                    ]
             }
       )
-    , ( { position = vec2 50 50
-        , size = vec2 100 100
-        }
+    , ( Window.bottomRight
+            ctx.window
+            { position = zero
+            , size = vec2 100 100
+            }
+            |> Window.move (vec2 -50 -50)
       , viewElement
             { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
             { title = text "Settings"
@@ -240,6 +256,33 @@ windowElements ctx model =
                         , centerX
                         ]
                         (toggleAppereanceButton model)
+                    ]
+            }
+      )
+    , ( Window.center
+            ctx.window
+            { position = zero
+            , size = vec2 320 240
+            }
+            |> Window.centerX ctx.window
+            |> Window.move (vec2 180 180)
+      , viewElement
+            { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
+            { title = text "Projects"
+            , content =
+                col [ centerX, centerY, width fill, padding 40 ]
+                    [ Element.newTabLink
+                        [ centerX ]
+                        { url = "https://www.hyhyve.com/"
+                        , label =
+                            row [ spacing 12, width fill ]
+                                [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
+                                , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
+                                , Element.paragraph [ alignTop ]
+                                    [ text " (Online events that are fun!)"
+                                    ]
+                                ]
+                        }
                     ]
             }
       )

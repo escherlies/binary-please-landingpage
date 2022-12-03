@@ -1,4 +1,4 @@
-module UI exposing (UI, UiContext, button, buttonWith, center, col, colors, root, row, text)
+module UI exposing (UI, UiContext, button, buttonWith, center, col, colors, fontSizeSm, root, row, text)
 
 import Element exposing (..)
 import Element.Background
@@ -24,7 +24,7 @@ type alias UiContext a =
 root : UiContext a -> Element msg -> Html msg
 root ctx =
     layout
-        [ Element.Font.size 14
+        [ fontSizeNormal
         , Element.Background.color ctx.ui.colors.background
         , Element.Font.color ctx.ui.colors.foreground
         , width fill
@@ -96,3 +96,22 @@ buttonWith label msg =
 textLabel : String -> Element msg
 textLabel =
     el [ centerX, centerY ] << Element.text
+
+
+
+-- Font Sizer
+
+
+fontSizer : Int -> Attr decorative msg
+fontSizer =
+    Element.Font.size << round << modular 14 1.25
+
+
+fontSizeSm : Attr decorative msg
+fontSizeSm =
+    fontSizer -1
+
+
+fontSizeNormal : Attr decorative msg
+fontSizeNormal =
+    fontSizer 1

@@ -1,12 +1,11 @@
 module BrowserWindow exposing (..)
 
 import Json.Decode as D
+import Math.Vector2 exposing (Vec2, vec2)
 
 
 type alias BrowserWindow =
-    { width : Float
-    , height : Float
-    }
+    Vec2
 
 
 type alias WithBrowserWindow ctx =
@@ -18,6 +17,6 @@ type alias WithBrowserWindow ctx =
 
 decode : D.Decoder BrowserWindow
 decode =
-    D.map2 BrowserWindow
+    D.map2 vec2
         (D.field "innerWidth" D.float)
         (D.field "innerHeight" D.float)

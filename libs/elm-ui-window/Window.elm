@@ -248,6 +248,56 @@ userSelect val =
 
 
 
+-- Helpers
+
+
+centerOffset : Vec2 -> Vec2 -> Vec2
+centerOffset browserWindow window =
+    scale 0.5 (sub browserWindow window)
+
+
+centerX : Vec2 -> Window -> Window
+centerX browserWindow window =
+    { window | position = setX (getX (centerOffset browserWindow window.size)) window.position }
+
+
+centerY : Vec2 -> Window -> Window
+centerY browserWindow window =
+    { window | position = setY (getY (centerOffset browserWindow window.size)) window.position }
+
+
+center : Vec2 -> Window -> Window
+center browserWindow window =
+    { window | position = centerOffset browserWindow window.size }
+
+
+bottomRight : Vec2 -> Window -> Window
+bottomRight browserWindow window =
+    { window | position = sub browserWindow window.size }
+
+
+bottom : Vec2 -> Window -> Window
+bottom browserWindow window =
+    { window
+        | position =
+            vec2 (getX window.position)
+                (getY (sub browserWindow window.size))
+    }
+
+
+move : Vec2 -> Window -> Window
+move v window =
+    { window
+        | position = add v window.position
+    }
+
+
+zero : Vec2
+zero =
+    vec2 0 0
+
+
+
 -- View
 
 
