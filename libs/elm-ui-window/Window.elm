@@ -315,7 +315,7 @@ viewElement :
     (Msg -> msg)
     -> Model
     -> Int
-    -> ( Window, Int -> Element msg )
+    -> ( Window, Element msg )
     -> Element.Attribute msg
 viewElement toMsg model ix ( position, content ) =
     let
@@ -372,11 +372,11 @@ viewElement toMsg model ix ( position, content ) =
                 ++ userSelect (model.drag == None)
             )
          <|
-            content ix
+            content
         )
 
 
-view : (Msg -> msg) -> Model -> List ( c, Int -> Element msg ) -> Element msg
+view : (Msg -> msg) -> Model -> List ( c, Element msg ) -> Element msg
 view toMsg model windowElements =
     el
         ([ width fill
@@ -400,7 +400,7 @@ view toMsg model windowElements =
         Element.none
 
 
-renderWindows : (Msg -> msg) -> Model -> List ( c, Int -> Element msg ) -> List (Attribute msg)
+renderWindows : (Msg -> msg) -> Model -> List ( c, Element msg ) -> List (Attribute msg)
 renderWindows toMsg model windowElements =
     let
         zipped =

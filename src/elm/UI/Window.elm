@@ -15,8 +15,8 @@ type alias WindowElement msg =
     { title : Element msg, content : Element msg }
 
 
-viewElement : { a | trackWindow : Int -> Vec2 -> msg, ui : UI } -> WindowElement msg -> Int -> Element msg
-viewElement ctx { title, content } ix =
+viewElement : { a | trackWindow : Vec2 -> msg, ui : UI } -> WindowElement msg -> Element msg
+viewElement ctx { title, content } =
     column
         [ Element.Border.width 2
         , width fill
@@ -40,7 +40,7 @@ viewElement ctx { title, content } ix =
                 }
              , htmlAttribute
                 (Html.Events.on "pointerdown"
-                    (D.map (ctx.trackWindow ix)
+                    (D.map ctx.trackWindow
                         (D.map2 vec2
                             (D.field "clientX" D.float)
                             (D.field "clientY" D.float)
