@@ -1,10 +1,11 @@
 module UI.Window exposing (..)
 
-import Element exposing (Element, clip, column, el, fill, height, padding, px, row, scrollbars, width)
+import Element exposing (Element, clip, column, el, fill, height, htmlAttribute, padding, px, row, scrollbars, width)
 import Element.Background
 import Element.Border
-import Element.Events exposing (onMouseDown)
 import Element.Font
+import Html.Events
+import Json.Decode as D
 import UI exposing (UI)
 import Window exposing (cursor, userSelect)
 
@@ -36,7 +37,10 @@ viewElement ctx { title, content } ix =
                 , right = 0
                 , bottom = 2
                 }
-             , onMouseDown (ctx.trackWindow ix)
+             , htmlAttribute
+                (Html.Events.on "pointerdown"
+                    (D.succeed (ctx.trackWindow ix))
+                )
              , cursor "move"
              , padding 8
              , Element.Font.semiBold

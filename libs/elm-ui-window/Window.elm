@@ -2,9 +2,8 @@ module Window exposing (..)
 
 import Array exposing (Array)
 import Element exposing (Attribute, Element, clip, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, px, row, width)
-import Element.Events exposing (onMouseDown, onMouseUp)
 import Html.Attributes exposing (style)
-import Html.Events
+import Html.Events exposing (on)
 import Json.Decode as D
 import Math.Vector2 exposing (Vec2, add, getX, getY, scale, setX, setY, sub, vec2)
 
@@ -206,7 +205,9 @@ handleRezise ix wp corner delta windows =
 resizer : (Msg -> msg) -> Corner -> List (Attribute msg) -> String -> Int -> Element msg
 resizer toMsg corner attrs c ix =
     el
-        ([ onMouseDown (toMsg <| ResizeWindow ix corner)
+        ([ htmlAttribute <|
+            on "pointerdown"
+                (D.succeed (toMsg <| ResizeWindow ix corner))
          , cursor c
          ]
             ++ attrs
@@ -372,9 +373,12 @@ view toMsg model windowElements =
         ([ width fill
          , height fill
          , clip
-         , onMouseUp (toMsg StopTrackWindow)
          , htmlAttribute
-            (Html.Events.on "mousemove"
+            (Html.Events.on "pointerup"
+                (D.succeed (toMsg StopTrackWindow))
+            )
+         , htmlAttribute
+            (Html.Events.on "pointermove"
                 (D.map2 vec2
                     (D.field "clientX" D.float)
                     (D.field "clientY" D.float)
