@@ -69,7 +69,7 @@ theme1 =
     { light =
         fromPalette "https://coolors.co/9A63FF-FFFFFF" |> toDuotone
     , dark =
-        fromPalette "https://coolors.co/6944AF-FFFFFF" |> List.reverse |> toDuotone
+        fromPalette "https://coolors.co/9a63ff-181818" |> toDuotone
     }
 
 
