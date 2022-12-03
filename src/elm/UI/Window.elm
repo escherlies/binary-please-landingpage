@@ -1,6 +1,7 @@
 module UI.Window exposing (..)
 
 import Element exposing (Element, column, fill, height, padding, px, row, width)
+import Element.Background
 import Element.Border
 import Element.Events exposing (onMouseDown)
 import Element.Font
@@ -24,6 +25,7 @@ viewElement ctx { title, content } ix =
             , color = ctx.ui.colors.foreground
             , size = 0
             }
+        , Element.Background.color ctx.ui.colors.background
         ]
         [ row
             ([ height (px 40)

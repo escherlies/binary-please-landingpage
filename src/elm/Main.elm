@@ -223,8 +223,8 @@ windowElements ctx model =
         }
       , viewElement
             { trackWindow = WindowMsg << Window.TrackWindow, ui = ctx.ui }
-            { title = text "Title"
-            , content = el [ Element.Font.bold, centerX, centerY ] (text "Content")
+            { title = text "Binary Please UG"
+            , content = el [ Element.Font.bold, centerX, centerY ] (text "Next Gen of Software")
             }
       )
     , ( { position = vec2 50 50

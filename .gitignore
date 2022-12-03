@@ -5,3 +5,5 @@ build
 .parcel-cache
 .vscode
 assets
+static
+.DS_Store
