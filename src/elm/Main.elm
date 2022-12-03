@@ -219,6 +219,7 @@ windowElements ctx model =
             { position = zero
             , size = vec2 320 250
             }
+            |> Window.move (vec2 0 -100)
       , viewElement
             { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Binary Please UG"
@@ -240,32 +241,13 @@ windowElements ctx model =
                     ]
             }
       )
-    , ( Window.bottomRight
-            ctx.window
-            { position = zero
-            , size = vec2 100 100
-            }
-            |> Window.move (vec2 -50 -50)
-      , viewElement
-            { trackWindow = trackWindow, ui = ctx.ui }
-            { title = text "Settings"
-            , content =
-                col [ centerX, centerY ]
-                    [ el
-                        [ alignBottom
-                        , centerX
-                        ]
-                        (toggleAppereanceButton model)
-                    ]
-            }
-      )
     , ( Window.center
             ctx.window
             { position = zero
             , size = vec2 320 240
             }
             |> Window.centerX ctx.window
-            |> Window.move (vec2 180 180)
+            |> Window.move (vec2 20 0)
       , viewElement
             { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Projects"
@@ -283,6 +265,25 @@ windowElements ctx model =
                                     ]
                                 ]
                         }
+                    ]
+            }
+      )
+    , ( Window.bottomRight
+            ctx.window
+            { position = zero
+            , size = vec2 100 100
+            }
+            |> Window.move (vec2 -50 -50)
+      , viewElement
+            { trackWindow = trackWindow, ui = ctx.ui }
+            { title = text "Settings"
+            , content =
+                col [ centerX, centerY ]
+                    [ el
+                        [ alignBottom
+                        , centerX
+                        ]
+                        (toggleAppereanceButton model)
                     ]
             }
       )
