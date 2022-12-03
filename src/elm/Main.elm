@@ -54,7 +54,7 @@ decodePortMessage dv =
                                 D.map UpdatePrefersColorScheme (D.field "value" decodeColorScheme)
 
                             "UpdateBrowserWindow" ->
-                                D.map (PortMsg << UpdateBrowserWindow) (D.field "value" BrowserWindow.decode)
+                                D.map UpdateBrowserWindow (D.field "value" BrowserWindow.decode)
 
                             other ->
                                 D.fail <| "Unkowm message type" ++ other
@@ -64,7 +64,7 @@ decodePortMessage dv =
         |> (\r ->
                 case r of
                     Ok msg ->
-                        msg
+                        PortMsg msg
 
                     Err s ->
                         GotError s
@@ -148,7 +148,6 @@ type Msg
     | Decrement
     | SendMessage
     | ToggleAppereance Appereance
-    | UpdatePrefersColorScheme Appereance
     | GotError String
     | WindowMsg Window.Msg
     | PortMsg Ports.PortMessage
@@ -169,9 +168,6 @@ update msg model =
         GotError _ ->
             ( model, Cmd.none )
 
-        UpdatePrefersColorScheme scheme ->
-            ( { model | settings = model.settings |> (\s -> { s | theme = scheme }) }, Cmd.none )
-
         Increment ->
             ( { model | counter = model.counter + 1 }, Cmd.none )
 
@@ -190,6 +186,9 @@ handlePortMessages pm model =
     case pm of
         UpdateBrowserWindow window ->
             ( { model | window = window }, Cmd.none )
+
+        UpdatePrefersColorScheme scheme ->
+            ( { model | settings = model.settings |> (\s -> { s | theme = scheme }) }, Cmd.none )
 
 
 view : Model -> Document Msg
