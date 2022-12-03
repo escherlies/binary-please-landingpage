@@ -40,9 +40,9 @@ type alias Model =
     }
 
 
-init : List ( Window, b ) -> Model
+init : List Window -> Model
 init windowElements =
-    { windows = Array.fromList <| List.map Tuple.first windowElements
+    { windows = Array.fromList windowElements
     , drag = None
     , mousePosition = vec2 0 0
     , mouseOffset = vec2 0 0

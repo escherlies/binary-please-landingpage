@@ -118,7 +118,15 @@ init fd =
               , windowModel = Window.empty
               , window = f.window
               }
-                |> (\m -> { m | windowModel = Window.init (windowElements (getContext m) m) })
+                |> (\m ->
+                        { m
+                            | windowModel =
+                                Window.init
+                                    (List.map Tuple.first <|
+                                        windowElements (getContext m) m
+                                    )
+                        }
+                   )
             , Cmd.none
             )
     in
