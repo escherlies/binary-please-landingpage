@@ -1,9 +1,11 @@
 module Window exposing (..)
 
 import Array exposing (Array)
-import Element exposing (Attribute, Element, clip, column, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, px, row, width)
+import Element exposing (Attribute, Element, clip, column, el, fill, height, htmlAttribute, moveDown, moveLeft, moveRight, moveUp, padding, px, row, width)
 import Element.Border
+import Element.Color exposing (rgb, rgba)
 import Element.Events exposing (onMouseDown, onMouseUp)
+import Element.Font
 import Html.Attributes exposing (style)
 import Html.Events
 import Json.Decode as D
@@ -237,12 +239,10 @@ pointerEventsAuto =
 userSelect : Bool -> List (Element.Attribute msg)
 userSelect val =
     if val then
-        [ pointerEventsAuto
-        ]
+        []
 
     else
-        [ pointerEventsNone
-        , Element.htmlAttribute (style "user-select" "none")
+        [ Element.htmlAttribute (style "user-select" "none")
         , Element.htmlAttribute (style "-ms-user-select" "none")
         , Element.htmlAttribute (style "-moz-user-select" "none")
         , Element.htmlAttribute (style "-webkit-user-select" "none")
@@ -254,13 +254,19 @@ userSelect val =
 -- View
 
 
+{-| A default window element
+-}
+type alias WindowElement msg =
+    { title : Element msg, content : Element msg }
+
+
 viewElement :
     (Msg -> msg)
     -> Model
     -> Int
-    -> ( Window, Element msg )
+    -> ( Window, WindowElement msg )
     -> Element.Attribute msg
-viewElement toMsg model ix ( position, content ) =
+viewElement toMsg model ix ( position, { content, title } ) =
     let
         bw =
             3
@@ -314,22 +320,33 @@ viewElement toMsg model ix ( position, content ) =
             ]
          <|
             column
-                [ Element.Border.width 3
+                [ Element.Border.width 2
                 , width fill
                 , height fill
+                , Element.Border.shadow
+                    { offset = ( 3, 3 )
+                    , blur = 0
+                    , color = rgba 0 0 0 0.3
+                    , size = 0
+                    }
                 ]
                 [ row
-                    [ height (px 40)
-                    , width fill
-                    , Element.Border.widthEach
+                    ([ height (px 40)
+                     , width fill
+                     , Element.Border.widthEach
                         { top = 0
                         , left = 0
                         , right = 0
-                        , bottom = 3
+                        , bottom = 2
                         }
-                    , onMouseDown (toMsg <| TrackWindow ix)
-                    ]
-                    []
+                     , onMouseDown (toMsg <| TrackWindow ix)
+                     , cursor "move"
+                     , padding 8
+                     , Element.Font.semiBold
+                     ]
+                        ++ userSelect False
+                    )
+                    [ title ]
                 , el
                     ([ width fill
                      , height fill
@@ -341,7 +358,7 @@ viewElement toMsg model ix ( position, content ) =
         )
 
 
-view : (Msg -> msg) -> Model -> List ( c, Element msg ) -> Element msg
+view : (Msg -> msg) -> Model -> List ( c, WindowElement msg ) -> Element msg
 view toMsg model windowElements =
     el
         ([ width fill
@@ -362,7 +379,7 @@ view toMsg model windowElements =
         Element.none
 
 
-renderWindows : (Msg -> msg) -> Model -> List ( c, Element msg ) -> List (Attribute msg)
+renderWindows : (Msg -> msg) -> Model -> List ( c, WindowElement msg ) -> List (Attribute msg)
 renderWindows toMsg model windowElements =
     let
         zipped =

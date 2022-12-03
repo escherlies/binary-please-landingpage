@@ -29,6 +29,9 @@ root ctx =
         , Element.Font.color ctx.ui.colors.foreground
         , width fill
         , height fill
+        , Element.Font.family
+            [ Element.Font.monospace
+            ]
         ]
 
 

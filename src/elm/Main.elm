@@ -13,7 +13,7 @@ import Math.Vector2 exposing (vec2)
 import UI exposing (col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
-import Window exposing (Window)
+import Window exposing (Window, WindowElement)
 
 
 type alias Flags =
@@ -186,23 +186,28 @@ view model =
     }
 
 
-windowElements : Model -> List ( Window, Element Msg )
+windowElements : Model -> List ( Window, WindowElement Msg )
 windowElements model =
     [ ( { position = vec2 300 300
         , size = vec2 320 240
         }
-      , el [ Element.Font.bold, centerX, centerY ] (text "Content")
+      , { title = text "Title"
+        , content = el [ Element.Font.bold, centerX, centerY ] (text "Content")
+        }
       )
     , ( { position = vec2 50 50
         , size = vec2 100 100
         }
-      , col [ centerX, centerY ]
-            [ el
-                [ alignBottom
-                , centerX
+      , { title = text "Settings"
+        , content =
+            col [ centerX, centerY ]
+                [ el
+                    [ alignBottom
+                    , centerX
+                    ]
+                    (toggleAppereanceButton model)
                 ]
-                (toggleAppereanceButton model)
-            ]
+        }
       )
     ]
 
