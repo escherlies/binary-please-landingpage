@@ -2,8 +2,10 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import Context exposing (Context, Lang(..))
-import Element exposing (Element, alignBottom, centerX, centerY, el, fill, height, html, htmlAttribute, padding, width)
+import Element exposing (Element, alignBottom, centerX, centerY, el, fill, height, html, htmlAttribute, row, spacing, width)
+import Element.Border
 import Element.Font
+import Element.Input
 import Html
 import Html.Attributes
 import Json.Decode as D exposing (Decoder, Value)
@@ -129,7 +131,7 @@ type Msg
     = Increment
     | Decrement
     | SendMessage
-    | ToggleAppereance
+    | ToggleAppereance Appereance
     | UpdatePrefersColorScheme Appereance
     | GotError String
     | WindowMsg Window.Msg
@@ -159,15 +161,8 @@ update msg model =
         SendMessage ->
             ( model, portSend "Hello!" )
 
-        ToggleAppereance ->
-            (case model.settings.theme of
-                Light ->
-                    Dark
-
-                Dark ->
-                    Light
-            )
-                |> (\new -> ( { model | settings = model.settings |> (\s -> { s | theme = new }) }, Cmd.none ))
+        ToggleAppereance t ->
+            ( { model | settings = model.settings |> (\s -> { s | theme = t }) }, Cmd.none )
 
 
 view : Model -> Document Msg
@@ -178,7 +173,6 @@ view model =
             (el
                 [ width fill
                 , height fill
-                , padding 20
                 , Element.inFront
                     (col
                         [ width fill
@@ -207,18 +201,52 @@ windowElements model =
                 [ alignBottom
                 , centerX
                 ]
-                (UI.buttonWith
-                    (if model.settings.theme == Light then
-                        fa "space-station-moon-construction"
-
-                     else
-                        fa "starship-freighter"
-                    )
-                    ToggleAppereance
-                )
+                (toggleAppereanceButton model)
             ]
       )
     ]
+
+
+toggleAppereanceButton : Model -> Element Msg
+toggleAppereanceButton model =
+    row [ spacing 8 ]
+        [ Element.Input.button
+            [ Element.Border.width 0
+            , Element.focused
+                []
+            ]
+            { label = fa "space-station-moon-construction"
+            , onPress = Just <| ToggleAppereance Dark
+            }
+        , Element.Input.button
+            [ Element.Border.width 0
+            , Element.focused
+                []
+            ]
+            { label =
+                if model.settings.theme == Light then
+                    fa "toggle-on"
+
+                else
+                    fa "toggle-off"
+            , onPress =
+                Just <|
+                    ToggleAppereance <|
+                        if model.settings.theme == Light then
+                            Dark
+
+                        else
+                            Light
+            }
+        , Element.Input.button
+            [ Element.Border.width 0
+            , Element.focused
+                []
+            ]
+            { label = fa "starship-freighter"
+            , onPress = Just <| ToggleAppereance Light
+            }
+        ]
 
 
 class : String -> Element.Attribute msg
