@@ -1,7 +1,6 @@
 module UI.Theme exposing (..)
 
-import Color exposing (Color, rgb)
-import Color.Manipulate exposing (invert)
+import Color exposing (Color, invert, rgb)
 import Color.Palette exposing (fromPalette)
 import Json.Decode as D exposing (Decoder)
 import Parser exposing ((|.), (|=), Step(..))
