@@ -146,7 +146,7 @@ updateWindows model mp =
             in
             case targetWindow of
                 Just wp ->
-                    handleRezise ix wp corner delta
+                    handleRezise wp corner delta
                         |> (\w -> Array.set ix w model.windows)
 
                 Nothing ->
@@ -154,8 +154,8 @@ updateWindows model mp =
                     model.windows
 
 
-handleRezise : Int -> Window -> Corner -> Vec2 -> Window
-handleRezise ix wp corner delta =
+handleRezise : Window -> Corner -> Vec2 -> Window
+handleRezise wp corner delta =
     (case corner of
         Bottom ->
             { wp
@@ -417,6 +417,7 @@ view toMsg model windowElements =
                     |> D.map (toMsg << MouseMove)
                 )
             )
+         , htmlAttribute (Html.Attributes.style "touch-action" "none")
          ]
             ++ renderWindows toMsg model windowElements
         )
