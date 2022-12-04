@@ -331,10 +331,11 @@ zero =
 viewElement :
     (Msg -> msg)
     -> Model
+    -> Int -- Focused element
     -> Int
     -> ( ( Int, Window ), Element msg )
     -> Element.Attribute msg
-viewElement toMsg model ix ( ( zindex, position ), content ) =
+viewElement toMsg model focusedIndex ix ( ( zindex, position ), content ) =
     let
         bw =
             3
@@ -391,7 +392,7 @@ viewElement toMsg model ix ( ( zindex, position ), content ) =
                 )
              , htmlAttribute (Html.Attributes.style "z-index" (String.fromInt <| zindex * 10))
              ]
-                ++ userSelect (model.drag == None)
+                ++ userSelect (model.drag == None && focusedIndex == ix)
             )
          <|
             content
@@ -432,8 +433,11 @@ renderWindows toMsg model windowElements =
                     |> List.map2 Tuple.pair (getOrder model.order)
                 )
                 (List.map Tuple.second windowElements)
+
+        focusedIndex =
+            Maybe.withDefault 0 (List.Extra.last model.order)
     in
-    List.indexedMap (viewElement toMsg model) zipped
+    List.indexedMap (viewElement toMsg model focusedIndex) zipped
 
 
 getOrder : List Int -> List Int
