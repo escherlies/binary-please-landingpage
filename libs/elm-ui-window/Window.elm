@@ -67,6 +67,7 @@ type Msg
     | ResizeWindow Int Corner
     | StopTrackWindow
     | MouseMove Vec2
+    | Focus Int
 
 
 update : Msg -> Model -> ( Model, Cmd msg )
@@ -82,12 +83,6 @@ update msg model =
                     unwrap (vec2 0 0)
                         (\w -> sub w.position mp)
                         (Array.get ix model.windows)
-                , order =
-                    model.order
-                        -- Add selected item to end of stack
-                        |> (\zis -> zis ++ [ ix ])
-                        -- Uniq
-                        |> List.Extra.remove ix
               }
             , Cmd.none
             )
@@ -99,6 +94,18 @@ update msg model =
             ( { model
                 | mousePosition = mp
                 , windows = updateWindows model mp
+              }
+            , Cmd.none
+            )
+
+        Focus ix ->
+            ( { model
+                | order =
+                    model.order
+                        -- Add selected item to end of stack
+                        |> (\zis -> zis ++ [ ix ])
+                        -- Uniq
+                        |> List.Extra.remove ix
               }
             , Cmd.none
             )
@@ -325,9 +332,9 @@ viewElement :
     (Msg -> msg)
     -> Model
     -> Int
-    -> ( Window, Element msg )
+    -> ( ( Int, Window ), Element msg )
     -> Element.Attribute msg
-viewElement toMsg model ix ( position, content ) =
+viewElement toMsg model ix ( ( zindex, position ), content ) =
     let
         bw =
             3
@@ -378,6 +385,11 @@ viewElement toMsg model ix ( position, content ) =
                     , resizer toMsg BottomRight [ height (px rs), width (px rs) ] "se-resize" ix
                     ]
                 )
+             , htmlAttribute
+                (Html.Events.on "pointerdown"
+                    (D.succeed (toMsg (Focus ix)))
+                )
+             , htmlAttribute (Html.Attributes.style "z-index" (String.fromInt <| zindex * 10))
              ]
                 ++ userSelect (model.drag == None)
             )
@@ -405,25 +417,23 @@ view toMsg model windowElements =
                 )
             )
          ]
-            ++ (renderWindows toMsg model windowElements
-                    |> List.sortBy Tuple.first
-                    |> List.map Tuple.second
-               )
+            ++ renderWindows toMsg model windowElements
         )
         Element.none
 
 
-renderWindows : (Msg -> msg) -> Model -> List ( c, Element msg ) -> List ( Int, Attribute msg )
+renderWindows : (Msg -> msg) -> Model -> List ( c, Element msg ) -> List (Attribute msg)
 renderWindows toMsg model windowElements =
     let
         zipped =
             List.map2
                 Tuple.pair
-                (Array.toList model.windows)
+                (Array.toList model.windows
+                    |> List.map2 Tuple.pair (getOrder model.order)
+                )
                 (List.map Tuple.second windowElements)
     in
     List.indexedMap (viewElement toMsg model) zipped
-        |> List.map2 Tuple.pair (getOrder model.order)
 
 
 getOrder : List Int -> List Int
