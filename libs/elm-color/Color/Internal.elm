@@ -125,9 +125,9 @@ hexToString8 =
 -- Converter Helpers
 
 
-toRgba : Color -> { r : Float, g : Float, b : Float, a : Float }
+toRgba : Color -> { red : Float, green : Float, blue : Float, alpha : Float }
 toRgba (Rgba r g b a) =
-    { r = r, g = g, b = b, a = a }
+    { red = r, green = g, blue = b, alpha = a }
 
 
 toRgbaList : Color -> List Float
@@ -135,12 +135,12 @@ toRgbaList (Rgba r g b a) =
     [ r, g, b, a ]
 
 
-toRgba255 : Color -> { r : Int, g : Int, b : Int, a : Int }
+toRgba255 : Color -> { red : Int, green : Int, blue : Int, alpha : Int }
 toRgba255 (Rgba r g b a) =
-    { r = round (r * 0xFF)
-    , g = round (g * 0xFF)
-    , b = round (b * 0xFF)
-    , a = round (a * 0xFF)
+    { red = round (r * 0xFF)
+    , green = round (g * 0xFF)
+    , blue = round (b * 0xFF)
+    , alpha = round (a * 0xFF)
     }
 
 
@@ -157,8 +157,8 @@ toRgba255List (Rgba r g b a) =
 -- Constructor Helpers
 
 
-fromRgb255 : Int -> Int -> Int -> Color
-fromRgb255 r g b =
+rgb255 : Int -> Int -> Int -> Color
+rgb255 r g b =
     Rgba
         (toFloat r / 0xFF)
         (toFloat g / 0xFF)
@@ -166,8 +166,8 @@ fromRgb255 r g b =
         1.0
 
 
-fromRgba255 : Int -> Int -> Int -> Int -> Color
-fromRgba255 r g b a =
+rgba255 : Int -> Int -> Int -> Int -> Color
+rgba255 r g b a =
     Rgba
         (toFloat r / 0xFF)
         (toFloat g / 0xFF)
@@ -182,7 +182,7 @@ Paired with `Hex.fromString` and `Hex.toString`
 -}
 fromInt : Int -> Color
 fromInt hex =
-    fromRgba255
+    rgba255
         (Bitwise.and 0xFF000000 hex |> Bitwise.shiftRightZfBy 24)
         (Bitwise.and 0x00FF0000 hex |> Bitwise.shiftRightZfBy 16)
         (Bitwise.and 0xFF00 hex |> Bitwise.shiftRightZfBy 8)

@@ -1,6 +1,6 @@
 module UI.Theme exposing (..)
 
-import Color exposing (Color, invert, rgb)
+import Color exposing (Color, invertRgb, rgb)
 import Color.Palette exposing (fromPalette)
 import Json.Decode as D exposing (Decoder)
 import Parser exposing ((|.), (|=), Step(..))
@@ -57,7 +57,7 @@ toDuotone clrs =
             Duotone fg bg
 
         fg :: [] ->
-            Duotone fg (invert fg)
+            Duotone fg (invertRgb fg)
 
         _ ->
             Duotone (rgb 0.2 0.2 0.2) (rgb 1 1 1)

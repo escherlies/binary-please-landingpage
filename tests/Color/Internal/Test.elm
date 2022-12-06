@@ -1,6 +1,6 @@
 module Color.Internal.Test exposing (..)
 
-import Color.Internal exposing (Color(..), fromRgba255, intFromColorString, rgb, rgba)
+import Color.Internal exposing (Color(..), intFromColorString, rgb, rgba, rgba255)
 import Color.Palette exposing (parsePalette)
 import Expect
 import Fuzz
@@ -44,19 +44,19 @@ suite =
             [ test "Convert color from int"
                 (\_ ->
                     Expect.equal
-                        (Color.Internal.fromRgba255 255 255 255 255)
+                        (Color.Internal.rgba255 255 255 255 255)
                         (Color.Internal.fromInt 0xFFFFFFFF)
                 )
             , test "Convert color from int 2"
                 (\_ ->
                     Expect.equal
-                        (fromRgba255 0 0 0 255)
+                        (rgba255 0 0 0 255)
                         (Color.Internal.fromInt 0xFF)
                 )
             , test "Convert color from int 3"
                 (\_ ->
                     Expect.equal
-                        (fromRgba255 255 255 255 255)
+                        (rgba255 255 255 255 255)
                         (Color.Internal.fromInt 0xFFFFFFFF)
                 )
             , test "Convert color from int 4"
