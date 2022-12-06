@@ -2,7 +2,7 @@
   "type": "application",
   "source-directories": [
     "src/elm",
-    "libs/elm-color",
+    "../elm-libs/elm-color/src",
     "libs/elm-ui-color",
     "libs/elm-ui-window"
   ],
