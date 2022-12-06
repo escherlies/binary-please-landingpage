@@ -1,4 +1,24 @@
-module Color exposing (..)
+module Color exposing
+    ( Color
+    , fromHex
+    , fromHsla
+    , fromRgb
+    , fromRgb255
+    , fromRgba
+    , hsl
+    , hsla
+    , invertRgb
+    , rgb
+    , rgb255
+    , rgba
+    , rgba255
+    , setAlpha
+    , toCssString
+    , toHexString
+    , toHsla
+    , toRgba
+    , toRgba255
+    )
 
 import Color.Hsl
 import Color.Internal exposing (Color(..), mapRgb)
@@ -88,8 +108,8 @@ fromHsla =
 -- Parse
 
 
-fromHexString : String -> Maybe Color
-fromHexString =
+fromHex : String -> Maybe Color
+fromHex =
     Color.Internal.fromHexString
 
 

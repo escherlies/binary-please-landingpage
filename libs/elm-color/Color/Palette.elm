@@ -8,7 +8,7 @@ import Parser exposing ((|.), (|=), Parser, Step(..), chompWhile, end, getChompe
 
 fromPalette : String -> List Color
 fromPalette =
-    List.filterMap Color.fromHexString << Result.withDefault [] << parsePalette
+    List.filterMap Color.fromHex << Result.withDefault [] << parsePalette
 
 
 {-| Parses different palette formats
