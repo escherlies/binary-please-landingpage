@@ -2,9 +2,9 @@
   "type": "application",
   "source-directories": [
     "src/elm",
-    "../elm-libs/elm-color/src",
     "libs/elm-ui-color",
-    "libs/elm-ui-window"
+    "../elm-libs/elm-color/src",
+    "../elm-libs/elm-ui-window/src"
   ],
   "elm-version": "0.19.1",
   "dependencies": {
