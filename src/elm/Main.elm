@@ -340,7 +340,7 @@ legalDisclosure ctx _ ix =
                         column []
                             (List.map
                                 (\t2 ->
-                                    if String.startsWith "#" (Debug.log "t2" t2) then
+                                    if String.startsWith "#" t2 then
                                         paragraph [ Element.Font.bold ] [ text t2 ]
 
                                     else
