@@ -59,6 +59,7 @@ viewElement ctx { title, content } =
             , height fill
             , clip
             , scrollbars
+            , padding 8
             ]
           <|
             content

@@ -1,4 +1,4 @@
-module UI exposing (UI, UiContext, button, buttonWith, center, col, colors, fontSizeSm, root, row, text)
+module UI exposing (UI, UiContext, button, buttonWith, center, class, col, colors, fontSizeSm, root, row, text, whiteSpacePreWrap)
 
 import Element exposing (..)
 import Element.Background
@@ -6,6 +6,7 @@ import Element.Border
 import Element.Font
 import Element.Input
 import Html exposing (Html)
+import Html.Attributes
 import List exposing (singleton)
 import UI.Color
 
@@ -115,3 +116,13 @@ fontSizeSm =
 fontSizeNormal : Attr decorative msg
 fontSizeNormal =
     fontSizer 1
+
+
+class : String -> Attribute msg
+class =
+    htmlAttribute << Html.Attributes.class
+
+
+whiteSpacePreWrap : Attribute msg
+whiteSpacePreWrap =
+    class "wspw"

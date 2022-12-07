@@ -204,7 +204,15 @@ view model =
             ctx =
                 getContext model
         in
-        [ root ctx
+        [ Html.node "style"
+            []
+            [ Html.text """
+                .wspw > * > .t {
+                    white-space: pre-wrap !important;
+                }
+                """
+            ]
+        , root ctx
             (el
                 [ width fill
                 , height fill
@@ -224,7 +232,8 @@ view model =
 windowElements : Context -> Model -> List ( Window, Element Msg )
 windowElements ctx model =
     List.indexedMap (|>)
-        [ windowBinaryPlease ctx model
+        [ legalDisclosure ctx model
+        , windowBinaryPlease ctx model
         , windowProject ctx model
         , winddowSettings ctx model
         ]
@@ -288,7 +297,7 @@ windowBinaryPlease : Context -> Model -> Int -> ( Window, Element Msg )
 windowBinaryPlease ctx _ ix =
     ( Window.center ctx.window
         { position = zero
-        , size = vec2 320 250
+        , size = vec2 330 260
         }
         |> Window.move (vec2 0 -100)
     , viewElement
@@ -310,6 +319,73 @@ windowBinaryPlease ctx _ ix =
                 , text "101001100110101010101101010101011011"
                 , text "011001101010100101010101010101010101"
                 ]
+        }
+    )
+
+
+legalDisclosure : Context -> Model -> Int -> ( Window, Element Msg )
+legalDisclosure ctx _ ix =
+    ( Window.center ctx.window
+        { position = zero
+        , size = vec2 330 260
+        }
+        |> Window.move (vec2 0 -100)
+    , viewElement
+        { trackWindow = trackWindow ix, ui = ctx.ui }
+        { title = text "Legal disclosure"
+        , content =
+            column [ centerX, centerY, spacing 14 ] <|
+                List.map
+                    (\t ->
+                        column []
+                            (List.map
+                                (\t2 ->
+                                    if String.startsWith "#" (Debug.log "t2" t2) then
+                                        paragraph [ Element.Font.bold ] [ text t2 ]
+
+                                    else
+                                        paragraph
+                                            [ UI.whiteSpacePreWrap ]
+                                            [ text t2 ]
+                                )
+                                (String.lines t)
+                            )
+                    )
+                <|
+                    String.split "\n\n"
+                        """
+# Legal disclosure
+
+Information in accordance with Section 5 TMG
+
+Binary Please UG (haftungsbeschränkt)
+c/o Factory Works GmbH
+Rheinsberger Straße 76/77
+10115 Berlin
+
+# Represented by
+
+Enrico Scherlies (Managing Director)
+
+# Contact Information
+
+Telephone:        +491743812983
+E-Mail:           support@hyhyve.com
+Internet address: https://binaryplease.com
+Register entry
+
+Entry in:         Handelsregister
+Register Number:  HRB 225 876 B
+Register Court:   Amtsgericht Charlottenburg
+
+# VAT number
+
+VAT identification number in accordance with Section 27 an of the German VAT act DE 341 410 687
+
+# Copyright
+
+The contents of binaryplease.com, unless otherwise stated, is protected by copyright.
+"""
         }
     )
 

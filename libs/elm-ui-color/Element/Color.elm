@@ -23,8 +23,8 @@ fontColor =
     Element.Font.color << toElementColor
 
 
-shadow : { a | offset : ( Float, Float ), size : Float, blur : Float, color : Color } -> Element.Attr decorative msg
-shadow { offset, size, blur, color } =
+borderShadow : { a | offset : ( Float, Float ), size : Float, blur : Float, color : Color } -> Element.Attr decorative msg
+borderShadow { offset, size, blur, color } =
     Element.Border.shadow
         { offset = offset
         , size = size
