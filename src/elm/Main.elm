@@ -10,7 +10,7 @@ import Element.Input
 import Html
 import Html.Attributes
 import Json.Decode as D exposing (Decoder, Value)
-import Math.Vector2 exposing (vec2)
+import Math.Vector2 exposing (getX, getY, vec2)
 import Ports exposing (PortMessage(..))
 import UI exposing (col, root, text)
 import UI.Color
@@ -223,23 +223,46 @@ view model =
                         (List.map getMessage model.messages)
                     )
                 ]
-                (Window.view WindowMsg model.windowModel (windowElements ctx model))
+                (Window.view WindowMsg
+                    model.windowModel
+                    (List.map Tuple.second <|
+                        windowElements ctx model
+                    )
+                )
             )
         ]
     }
 
 
-windowElements : Context -> Model -> List ( Window, Element Msg )
+windowElements : Context -> Model -> List ( Window, Int -> Window -> Element Msg )
 windowElements ctx model =
     List.indexedMap (|>)
-        [ legalDisclosure ctx model
+        [ \ix ->
+            ( { position = zero
+              , size = vec2 150 200
+              }
+                |> Window.move (vec2 50 50)
+            , \i w ->
+                viewElement
+                    { trackWindow = trackWindow ix, ui = ctx.ui }
+                    { title = text <| "ix = " ++ String.fromInt i
+                    , content =
+                        col [ centerX, centerY ]
+                            [ text <| "x = " ++ String.fromFloat (getX w.position)
+                            , text <| "y = " ++ String.fromFloat (getY w.position)
+                            , text <| "w = " ++ String.fromFloat (getX w.size)
+                            , text <| "h = " ++ String.fromFloat (getY w.size)
+                            ]
+                    }
+            )
+        , legalDisclosure ctx model
         , windowBinaryPlease ctx model
         , windowProject ctx model
         , winddowSettings ctx model
         ]
 
 
-winddowSettings : Context -> Model -> Int -> ( Window, Element Msg )
+winddowSettings : Context -> Model -> Int -> ( Window, Int -> Window -> Element Msg )
 winddowSettings ctx model ix =
     ( Window.bottomRight
         ctx.window
@@ -247,22 +270,23 @@ winddowSettings ctx model ix =
         , size = vec2 100 100
         }
         |> Window.move (vec2 -50 -50)
-    , viewElement
-        { trackWindow = trackWindow ix, ui = ctx.ui }
-        { title = text "Settings"
-        , content =
-            col [ centerX, centerY ]
-                [ el
-                    [ alignBottom
-                    , centerX
+    , \_ _ ->
+        viewElement
+            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { title = text "Settings"
+            , content =
+                col [ centerX, centerY ]
+                    [ el
+                        [ alignBottom
+                        , centerX
+                        ]
+                        (toggleAppereanceButton model)
                     ]
-                    (toggleAppereanceButton model)
-                ]
-        }
+            }
     )
 
 
-windowProject : Context -> Model -> Int -> ( Window, Element Msg )
+windowProject : { a | window : Math.Vector2.Vec2, ui : UI.UI } -> b -> Int -> ( Window, c -> d -> Element Msg )
 windowProject ctx _ ix =
     ( Window.center
         ctx.window
@@ -271,89 +295,92 @@ windowProject ctx _ ix =
         }
         |> Window.centerX ctx.window
         |> Window.move (vec2 20 0)
-    , viewElement
-        { trackWindow = trackWindow ix, ui = ctx.ui }
-        { title = text "Projects"
-        , content =
-            col [ centerX, centerY, width fill, padding 40 ]
-                [ Element.newTabLink
-                    [ centerX ]
-                    { url = "https://www.hyhyve.com/"
-                    , label =
-                        row [ spacing 12, width fill ]
-                            [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
-                            , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
-                            , Element.paragraph [ alignTop ]
-                                [ text " (Online events that are fun!)"
+    , \_ _ ->
+        viewElement
+            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { title = text "Projects"
+            , content =
+                col [ centerX, centerY, width fill, padding 40 ]
+                    [ Element.newTabLink
+                        [ centerX ]
+                        { url = "https://www.hyhyve.com/"
+                        , label =
+                            row [ spacing 12, width fill ]
+                                [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
+                                , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
+                                , Element.paragraph [ alignTop ]
+                                    [ text " (Online events that are fun!)"
+                                    ]
                                 ]
-                            ]
-                    }
-                ]
-        }
+                        }
+                    ]
+            }
     )
 
 
-windowBinaryPlease : Context -> Model -> Int -> ( Window, Element Msg )
+windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : UI.UI } -> b -> Int -> ( Window, c -> d -> Element Msg )
 windowBinaryPlease ctx _ ix =
     ( Window.center ctx.window
         { position = zero
         , size = vec2 330 260
         }
         |> Window.move (vec2 0 -100)
-    , viewElement
-        { trackWindow = trackWindow ix, ui = ctx.ui }
-        { title = text "Binary Please UG"
-        , content =
-            column [ centerX, centerY ]
-                [ text "101010101010011000001010101010101011"
-                , text "101010110100110010101010101010101101"
-                , text "010101010101010101010101010100101010"
-                , text "101001010110101001010101010101010100"
-                , text "010101010101010101011010100101011001"
-                , text "010101101010101010101010101010100101"
-                , text "100101011Next1Gen11Software110101001"
-                , text "101001010101011010100110101010101010"
-                , text "101010101010011000001010101010101011"
-                , text "101000010111010111010110100010101011"
-                , text "101000101010101001011001010101010101"
-                , text "101001100110101010101101010101011011"
-                , text "011001101010100101010101010101010101"
-                ]
-        }
+    , \_ _ ->
+        viewElement
+            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { title = text "Binary Please UG"
+            , content =
+                column [ centerX, centerY ]
+                    [ text "101010101010011000001010101010101011"
+                    , text "101010110100110010101010101010101101"
+                    , text "010101010101010101010101010100101010"
+                    , text "101001010110101001010101010101010100"
+                    , text "010101010101010101011010100101011001"
+                    , text "010101101010101010101010101010100101"
+                    , text "100101011Next1Gen11Software110101001"
+                    , text "101001010101011010100110101010101010"
+                    , text "101010101010011000001010101010101011"
+                    , text "101000010111010111010110100010101011"
+                    , text "101000101010101001011001010101010101"
+                    , text "101001100110101010101101010101011011"
+                    , text "011001101010100101010101010101010101"
+                    ]
+            }
     )
 
 
-legalDisclosure : Context -> Model -> Int -> ( Window, Element Msg )
+legalDisclosure : { a | window : Math.Vector2.Vec2, ui : UI.UI } -> b -> Int -> ( Window, c -> d -> Element Msg )
 legalDisclosure ctx _ ix =
     ( Window.center ctx.window
         { position = zero
         , size = vec2 330 260
         }
         |> Window.move (vec2 0 -100)
-    , viewElement
-        { trackWindow = trackWindow ix, ui = ctx.ui }
-        { title = text "Legal disclosure"
-        , content =
-            column [ centerX, centerY, spacing 14 ] <|
-                List.map
-                    (\t ->
-                        column []
-                            (List.map
-                                (\t2 ->
-                                    if String.startsWith "#" t2 then
-                                        paragraph [ Element.Font.bold ] [ text t2 ]
+    , \_ _ ->
+        viewElement
+            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { title = text "Legal disclosure"
+            , content =
+                column [ centerX, centerY, spacing 14 ] <|
+                    List.map
+                        (\t ->
+                            column []
+                                (List.map
+                                    (\t2 ->
+                                        if String.startsWith "#" t2 then
+                                            paragraph [ Element.Font.bold ] [ text t2 ]
 
-                                    else
-                                        paragraph
-                                            [ UI.whiteSpacePreWrap ]
-                                            [ text t2 ]
+                                        else
+                                            paragraph
+                                                [ UI.whiteSpacePreWrap ]
+                                                [ text t2 ]
+                                    )
+                                    (String.lines t)
                                 )
-                                (String.lines t)
-                            )
-                    )
-                <|
-                    String.split "\n\n"
-                        """
+                        )
+                    <|
+                        String.split "\n\n"
+                            """
 # Legal disclosure
 
 Information in accordance with Section 5 TMG
@@ -386,7 +413,7 @@ VAT identification number in accordance with Section 27 an of the German VAT act
 
 The contents of binaryplease.com, unless otherwise stated, is protected by copyright.
 """
-        }
+            }
     )
 
 
