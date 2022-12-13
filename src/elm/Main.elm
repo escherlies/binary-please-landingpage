@@ -1,5 +1,6 @@
 port module Main exposing (..)
 
+import Area exposing (zero)
 import Browser exposing (Document)
 import BrowserWindow exposing (BrowserWindow)
 import Context exposing (Context, Lang(..))
@@ -17,7 +18,6 @@ import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 import UI.Window exposing (viewElement)
 import Window exposing (Window)
-import Window.Vec2 exposing (zero)
 
 
 type alias Flags =
