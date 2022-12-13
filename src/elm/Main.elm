@@ -16,7 +16,8 @@ import UI exposing (col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 import UI.Window exposing (viewElement)
-import Window exposing (Window, zero)
+import Window exposing (Window)
+import Window.Vec2 exposing (zero)
 
 
 type alias Flags =
@@ -252,6 +253,24 @@ windowElements ctx model =
                             , text <| "y = " ++ String.fromFloat (getY w.position)
                             , text <| "w = " ++ String.fromFloat (getX w.size)
                             , text <| "h = " ++ String.fromFloat (getY w.size)
+                            ]
+                    }
+            )
+        , \ix ->
+            ( { position = vec2 200 200
+              , size = vec2 250 250
+              }
+                |> Window.move (vec2 50 50)
+            , \_ _ ->
+                viewElement
+                    { trackWindow = trackWindow ix, ui = ctx.ui }
+                    { title = text <| "Mouse position, viewport size"
+                    , content =
+                        col [ centerX, centerY ]
+                            [ text <| "x = " ++ String.fromFloat (getX model.windowModel.mousePosition)
+                            , text <| "y = " ++ String.fromFloat (getY model.windowModel.mousePosition)
+                            , text <| "vw = " ++ String.fromFloat (getX model.window)
+                            , text <| "vh = " ++ String.fromFloat (getY model.window)
                             ]
                     }
             )
