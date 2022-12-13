@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Area exposing (zero)
 import Browser exposing (Document)
-import BrowserWindow exposing (BrowserWindow)
+import BrowserWindow exposing (BrowserWindow, WithBrowserWindow)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, alignBottom, alignTop, centerX, centerY, column, el, fill, height, html, htmlAttribute, padding, paragraph, row, spacing, width)
 import Element.Border
@@ -13,7 +13,7 @@ import Html.Attributes
 import Json.Decode as D exposing (Decoder, Value)
 import Math.Vector2 exposing (getX, getY, vec2)
 import Ports exposing (PortMessage(..))
-import UI exposing (col, root, text)
+import UI exposing (UiContext, col, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 import UI.Window exposing (viewElement)
@@ -123,8 +123,8 @@ init fd =
                         { m
                             | windowModel =
                                 Window.init
-                                    (List.map Tuple.first <|
-                                        windowElements (getContext m) m
+                                    (List.map .window <|
+                                        windowElements (getWindowContext m) m
                                     )
                         }
                    )
@@ -226,8 +226,10 @@ view model =
                 ]
                 (Window.view WindowMsg
                     model.windowModel
-                    (List.map Tuple.second <|
-                        windowElements ctx model
+                    (List.map .render <|
+                        windowElements
+                            (getWindowContext model)
+                            model
                     )
                 )
             )
@@ -235,17 +237,30 @@ view model =
     }
 
 
-windowElements : Context -> Model -> List ( Window, Int -> Window -> Element Msg )
+type alias WindowElement msg =
+    { window : Window
+    , render : Int -> Window -> Element msg
+    }
+
+
+type alias WithTrackWindow a =
+    { a
+        | trackWindow : Int -> Math.Vector2.Vec2 -> Msg
+    }
+
+
+windowElements : WithBrowserWindow (UiContext (WithTrackWindow a)) -> Model -> List (WindowElement Msg)
 windowElements ctx model =
-    List.indexedMap (|>)
-        [ \ix ->
-            ( { position = zero
-              , size = vec2 150 200
-              }
+    -- List.indexedMap (|>)
+    [ { window =
+            { position = zero
+            , size = vec2 150 200
+            }
                 |> Window.move (vec2 50 50)
-            , \i w ->
+      , render =
+            \i w ->
                 viewElement
-                    { trackWindow = trackWindow ix, ui = ctx.ui }
+                    { trackWindow = trackWindow, ui = ctx.ui }
                     { title = text <| "ix = " ++ String.fromInt i
                     , content =
                         col [ centerX, centerY ]
@@ -255,43 +270,46 @@ windowElements ctx model =
                             , text <| "h = " ++ String.fromFloat (getY w.size)
                             ]
                     }
-            )
-        , \ix ->
-            ( { position = vec2 200 200
-              , size = vec2 250 250
-              }
+                    i
+                    w
+      }
+    , { window =
+            { position = vec2 200 200
+            , size = vec2 250 250
+            }
                 |> Window.move (vec2 50 50)
-            , \_ _ ->
-                viewElement
-                    { trackWindow = trackWindow ix, ui = ctx.ui }
-                    { title = text <| "Mouse position, viewport size"
-                    , content =
-                        col [ centerX, centerY ]
-                            [ text <| "x = " ++ String.fromFloat (getX model.windowModel.mousePosition)
-                            , text <| "y = " ++ String.fromFloat (getY model.windowModel.mousePosition)
-                            , text <| "vw = " ++ String.fromFloat (getX model.window)
-                            , text <| "vh = " ++ String.fromFloat (getY model.window)
-                            ]
-                    }
-            )
-        , legalDisclosure ctx model
-        , windowBinaryPlease ctx model
-        , windowProject ctx model
-        , winddowSettings ctx model
-        ]
+      , render =
+            viewElement
+                { trackWindow = trackWindow, ui = ctx.ui }
+                { title = text <| "Mouse position, viewport size"
+                , content =
+                    col [ centerX, centerY ]
+                        [ text <| "x = " ++ String.fromFloat (getX model.windowModel.mousePosition)
+                        , text <| "y = " ++ String.fromFloat (getY model.windowModel.mousePosition)
+                        , text <| "vw = " ++ String.fromFloat (getX model.window)
+                        , text <| "vh = " ++ String.fromFloat (getY model.window)
+                        ]
+                }
+      }
+    , legalDisclosure ctx model
+    , windowBinaryPlease ctx model
+    , windowProject ctx model
+    , winddowSettings ctx model
+    ]
 
 
-winddowSettings : Context -> Model -> Int -> ( Window, Int -> Window -> Element Msg )
-winddowSettings ctx model ix =
-    ( Window.bottomRight
-        ctx.window
-        { position = zero
-        , size = vec2 100 100
-        }
-        |> Window.move (vec2 -50 -50)
-    , \_ _ ->
+winddowSettings : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> Model -> { window : Window, render : Int -> f -> Element Msg }
+winddowSettings ctx model =
+    { window =
+        Window.bottomRight
+            ctx.window
+            { position = zero
+            , size = vec2 100 100
+            }
+            |> Window.move (vec2 -50 -50)
+    , render =
         viewElement
-            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Settings"
             , content =
                 col [ centerX, centerY ]
@@ -302,21 +320,22 @@ winddowSettings ctx model ix =
                         (toggleAppereanceButton model)
                     ]
             }
-    )
+    }
 
 
-windowProject : { a | window : Math.Vector2.Vec2, ui : UI.UI } -> b -> Int -> ( Window, c -> d -> Element Msg )
-windowProject ctx _ ix =
-    ( Window.center
-        ctx.window
-        { position = zero
-        , size = vec2 320 240
-        }
-        |> Window.centerX ctx.window
-        |> Window.move (vec2 20 0)
-    , \_ _ ->
+windowProject : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> d -> { window : Window, render : Int -> f -> Element Msg }
+windowProject ctx _ =
+    { window =
+        Window.center
+            ctx.window
+            { position = zero
+            , size = vec2 320 240
+            }
+            |> Window.centerX ctx.window
+            |> Window.move (vec2 20 0)
+    , render =
         viewElement
-            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Projects"
             , content =
                 col [ centerX, centerY, width fill, padding 40 ]
@@ -334,19 +353,20 @@ windowProject ctx _ ix =
                         }
                     ]
             }
-    )
+    }
 
 
-windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : UI.UI } -> b -> Int -> ( Window, c -> d -> Element Msg )
-windowBinaryPlease ctx _ ix =
-    ( Window.center ctx.window
-        { position = zero
-        , size = vec2 330 260
-        }
-        |> Window.move (vec2 0 -100)
-    , \_ _ ->
+windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> d -> { window : Window, render : Int -> f -> Element Msg }
+windowBinaryPlease ctx _ =
+    { window =
+        Window.center ctx.window
+            { position = zero
+            , size = vec2 330 260
+            }
+            |> Window.move (vec2 0 -100)
+    , render =
         viewElement
-            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Binary Please UG"
             , content =
                 column [ centerX, centerY ]
@@ -365,19 +385,20 @@ windowBinaryPlease ctx _ ix =
                     , text "011001101010100101010101010101010101"
                     ]
             }
-    )
+    }
 
 
-legalDisclosure : { a | window : Math.Vector2.Vec2, ui : UI.UI } -> b -> Int -> ( Window, c -> d -> Element Msg )
-legalDisclosure ctx _ ix =
-    ( Window.center ctx.window
-        { position = zero
-        , size = vec2 330 260
-        }
-        |> Window.move (vec2 0 -100)
-    , \_ _ ->
+legalDisclosure : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> d -> { window : Window, render : Int -> f -> Element Msg }
+legalDisclosure ctx _ =
+    { window =
+        Window.center ctx.window
+            { position = zero
+            , size = vec2 330 260
+            }
+            |> Window.move (vec2 0 -100)
+    , render =
         viewElement
-            { trackWindow = trackWindow ix, ui = ctx.ui }
+            { trackWindow = trackWindow, ui = ctx.ui }
             { title = text "Legal disclosure"
             , content =
                 column [ centerX, centerY, spacing 14 ] <|
@@ -433,7 +454,7 @@ VAT identification number in accordance with Section 27 an of the German VAT act
 The contents of binaryplease.com, unless otherwise stated, is protected by copyright.
 """
             }
-    )
+    }
 
 
 trackWindow : Int -> Math.Vector2.Vec2 -> Msg
@@ -505,7 +526,7 @@ getMessage arg1 =
             el [] (text err)
 
 
-getContext : Model -> Context
+getContext : Model -> Context {}
 getContext m =
     { ui =
         { colors = UI.Color.fromTheme UI.Theme.theme1 m.settings.theme
@@ -513,4 +534,16 @@ getContext m =
     , lang = De
     , version = 1
     , window = m.window
+    }
+
+
+getWindowContext : Model -> WithTrackWindow (Context {})
+getWindowContext m =
+    { ui =
+        { colors = UI.Color.fromTheme UI.Theme.theme1 m.settings.theme
+        }
+    , lang = De
+    , version = 1
+    , window = m.window
+    , trackWindow = trackWindow
     }

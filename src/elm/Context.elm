@@ -41,5 +41,5 @@ type alias VersionContext ctx =
 -- -}
 
 
-type alias Context =
-    WithBrowserWindow (UiContext (LangContext (VersionContext {})))
+type alias Context a =
+    WithBrowserWindow (UiContext (LangContext (VersionContext a)))

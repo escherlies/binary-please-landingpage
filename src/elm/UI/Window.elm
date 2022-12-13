@@ -6,8 +6,8 @@ import Element.Border
 import Element.Font
 import Html.Events
 import Json.Decode as D
-import Math.Vector2 exposing (Vec2, vec2)
-import UI exposing (UI)
+import Math.Vector2 exposing (vec2)
+import UI
 import Window exposing (cursor, userSelect)
 
 
@@ -15,8 +15,8 @@ type alias WindowElement msg =
     { title : Element msg, content : Element msg }
 
 
-viewElement : { a | trackWindow : Vec2 -> msg, ui : UI } -> WindowElement msg -> Element msg
-viewElement ctx { title, content } =
+viewElement : { a | ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> { e | title : Element msg, content : Element msg } -> d -> f -> Element msg
+viewElement ctx { title, content } ix _ =
     column
         [ Element.Border.width 2
         , width fill
@@ -40,7 +40,7 @@ viewElement ctx { title, content } =
                 }
              , htmlAttribute
                 (Html.Events.on "pointerdown"
-                    (D.map ctx.trackWindow
+                    (D.map (ctx.trackWindow ix)
                         (D.map2 vec2
                             (D.field "clientX" D.float)
                             (D.field "clientY" D.float)
