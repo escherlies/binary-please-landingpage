@@ -1,6 +1,5 @@
 module Content exposing (..)
 
-import Area exposing (zero)
 import Context exposing (Lang(..))
 import Element exposing (alignBottom, alignTop, centerX, centerY, column, el, fill, padding, paragraph, row, spacing, width)
 import Element.Font
@@ -10,6 +9,7 @@ import UI exposing (col, fa, text)
 import UI.Theme exposing (Appereance(..))
 import UI.Window exposing (viewElement)
 import Window
+import Window.Area exposing (zero)
 
 
 debugWindows : { a | ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : Int -> Math.Vector2.Vec2 -> msg } -> { d | windowModel : { e | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List { window : Window.Window, render : Int -> { f | position : Math.Vector2.Vec2, size : Math.Vector2.Vec2 } -> Element.Element msg }

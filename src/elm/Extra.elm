@@ -1,7 +1,9 @@
-module Combinators exposing (..)
+module Extra exposing (..)
 
-{-| Combinators used in this project
+{-| Extra stuff like helpers and utility functions
 -}
+
+-- Combinators
 
 
 {-| Blackbird

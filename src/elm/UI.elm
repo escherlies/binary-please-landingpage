@@ -1,11 +1,11 @@
 module UI exposing (..)
 
-import Combinators exposing (vStar)
 import Element exposing (..)
 import Element.Background
 import Element.Border
 import Element.Font
 import Element.Input
+import Extra exposing (vStar)
 import Html exposing (Html)
 import Html.Attributes
 import List exposing (singleton)
