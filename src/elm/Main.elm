@@ -1,22 +1,19 @@
 port module Main exposing (..)
 
-import Area exposing (zero)
 import Browser exposing (Document)
-import BrowserWindow exposing (BrowserWindow, WithBrowserWindow)
+import BrowserWindow exposing (BrowserWindow)
+import Content exposing (debugWindows, legalDisclosure, winddowSettings, windowBinaryPlease, windowProject)
 import Context exposing (Context, Lang(..))
-import Element exposing (Element, alignBottom, alignTop, centerX, centerY, column, el, fill, height, html, htmlAttribute, padding, paragraph, row, spacing, width)
+import Element exposing (Element, el, fill, height, row, spacing, width)
 import Element.Border
-import Element.Font
 import Element.Input
 import Html
-import Html.Attributes
 import Json.Decode as D exposing (Decoder, Value)
-import Math.Vector2 exposing (getX, getY, vec2)
+import Math.Vector2 exposing (vec2)
 import Ports exposing (PortMessage(..))
-import UI exposing (UiContext, col, root, text)
+import UI exposing (col, faEl, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
-import UI.Window exposing (viewElement)
 import Window exposing (Window)
 
 
@@ -95,6 +92,7 @@ type alias Model =
     , messages : List Message
     , settings :
         { theme : Appereance
+        , debug : Bool
         }
     , windowModel : Window.Model
     , window : BrowserWindow
@@ -115,6 +113,7 @@ init fd =
               , messages = []
               , settings =
                     { theme = f.prefersColorScheme
+                    , debug = False
                     }
               , windowModel = Window.empty
               , window = f.window
@@ -249,212 +248,19 @@ type alias WithTrackWindow a =
     }
 
 
-windowElements : WithBrowserWindow (UiContext (WithTrackWindow a)) -> Model -> List (WindowElement Msg)
+windowElements : Context (WithTrackWindow a) -> Model -> List (WindowElement Msg)
 windowElements ctx model =
-    -- List.indexedMap (|>)
-    [ { window =
-            { position = zero
-            , size = vec2 150 200
-            }
-                |> Window.move (vec2 50 50)
-      , render =
-            \i w ->
-                viewElement
-                    { trackWindow = trackWindow, ui = ctx.ui }
-                    { title = text <| "ix = " ++ String.fromInt i
-                    , content =
-                        col [ centerX, centerY ]
-                            [ text <| "x = " ++ String.fromFloat (getX w.position)
-                            , text <| "y = " ++ String.fromFloat (getY w.position)
-                            , text <| "w = " ++ String.fromFloat (getX w.size)
-                            , text <| "h = " ++ String.fromFloat (getY w.size)
-                            ]
-                    }
-                    i
-                    w
-      }
-    , { window =
-            { position = vec2 200 200
-            , size = vec2 250 250
-            }
-                |> Window.move (vec2 50 50)
-      , render =
-            viewElement
-                { trackWindow = trackWindow, ui = ctx.ui }
-                { title = text <| "Mouse position, viewport size"
-                , content =
-                    col [ centerX, centerY ]
-                        [ text <| "x = " ++ String.fromFloat (getX model.windowModel.mousePosition)
-                        , text <| "y = " ++ String.fromFloat (getY model.windowModel.mousePosition)
-                        , text <| "vw = " ++ String.fromFloat (getX model.window)
-                        , text <| "vh = " ++ String.fromFloat (getY model.window)
-                        ]
-                }
-      }
-    , legalDisclosure ctx model
+    [ legalDisclosure ctx model
     , windowBinaryPlease ctx model
     , windowProject ctx model
-    , winddowSettings ctx model
+    , winddowSettings toggleAppereanceButton ctx model
     ]
+        ++ (if ctx.debug then
+                debugWindows ctx model
 
-
-winddowSettings : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> Model -> { window : Window, render : Int -> f -> Element Msg }
-winddowSettings ctx model =
-    { window =
-        Window.bottomRight
-            ctx.window
-            { position = zero
-            , size = vec2 100 100
-            }
-            |> Window.move (vec2 -50 -50)
-    , render =
-        viewElement
-            { trackWindow = trackWindow, ui = ctx.ui }
-            { title = text "Settings"
-            , content =
-                col [ centerX, centerY ]
-                    [ el
-                        [ alignBottom
-                        , centerX
-                        ]
-                        (toggleAppereanceButton model)
-                    ]
-            }
-    }
-
-
-windowProject : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> d -> { window : Window, render : Int -> f -> Element Msg }
-windowProject ctx _ =
-    { window =
-        Window.center
-            ctx.window
-            { position = zero
-            , size = vec2 320 240
-            }
-            |> Window.centerX ctx.window
-            |> Window.move (vec2 20 0)
-    , render =
-        viewElement
-            { trackWindow = trackWindow, ui = ctx.ui }
-            { title = text "Projects"
-            , content =
-                col [ centerX, centerY, width fill, padding 40 ]
-                    [ Element.newTabLink
-                        [ centerX ]
-                        { url = "https://www.hyhyve.com/"
-                        , label =
-                            row [ spacing 12, width fill ]
-                                [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
-                                , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
-                                , Element.paragraph [ alignTop ]
-                                    [ text " (Online events that are fun!)"
-                                    ]
-                                ]
-                        }
-                    ]
-            }
-    }
-
-
-windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> d -> { window : Window, render : Int -> f -> Element Msg }
-windowBinaryPlease ctx _ =
-    { window =
-        Window.center ctx.window
-            { position = zero
-            , size = vec2 330 260
-            }
-            |> Window.move (vec2 0 -100)
-    , render =
-        viewElement
-            { trackWindow = trackWindow, ui = ctx.ui }
-            { title = text "Binary Please UG"
-            , content =
-                column [ centerX, centerY ]
-                    [ text "101010101010011000001010101010101011"
-                    , text "101010110100110010101010101010101101"
-                    , text "010101010101010101010101010100101010"
-                    , text "101001010110101001010101010101010100"
-                    , text "010101010101010101011010100101011001"
-                    , text "010101101010101010101010101010100101"
-                    , text "100101011Next1Gen11Software110101001"
-                    , text "101001010101011010100110101010101010"
-                    , text "101010101010011000001010101010101011"
-                    , text "101000010111010111010110100010101011"
-                    , text "101000101010101001011001010101010101"
-                    , text "101001100110101010101101010101011011"
-                    , text "011001101010100101010101010101010101"
-                    ]
-            }
-    }
-
-
-legalDisclosure : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } } } -> d -> { window : Window, render : Int -> f -> Element Msg }
-legalDisclosure ctx _ =
-    { window =
-        Window.center ctx.window
-            { position = zero
-            , size = vec2 330 260
-            }
-            |> Window.move (vec2 0 -100)
-    , render =
-        viewElement
-            { trackWindow = trackWindow, ui = ctx.ui }
-            { title = text "Legal disclosure"
-            , content =
-                column [ centerX, centerY, spacing 14 ] <|
-                    List.map
-                        (\t ->
-                            column []
-                                (List.map
-                                    (\t2 ->
-                                        if String.startsWith "#" t2 then
-                                            paragraph [ Element.Font.bold ] [ text t2 ]
-
-                                        else
-                                            paragraph
-                                                [ UI.whiteSpacePreWrap ]
-                                                [ text t2 ]
-                                    )
-                                    (String.lines t)
-                                )
-                        )
-                    <|
-                        String.split "\n\n"
-                            """
-# Legal disclosure
-
-Information in accordance with Section 5 TMG
-
-Binary Please UG (haftungsbeschränkt)
-c/o Factory Works GmbH
-Rheinsberger Straße 76/77
-10115 Berlin
-
-# Represented by
-
-Enrico Scherlies (Managing Director)
-
-# Contact Information
-
-Telephone:        +491743812983
-E-Mail:           support@hyhyve.com
-Internet address: https://binaryplease.com
-Register entry
-
-Entry in:         Handelsregister
-Register Number:  HRB 225 876 B
-Register Court:   Amtsgericht Charlottenburg
-
-# VAT number
-
-VAT identification number in accordance with Section 27 an of the German VAT act DE 341 410 687
-
-# Copyright
-
-The contents of binaryplease.com, unless otherwise stated, is protected by copyright.
-"""
-            }
-    }
+            else
+                []
+           )
 
 
 trackWindow : Int -> Math.Vector2.Vec2 -> Msg
@@ -462,61 +268,31 @@ trackWindow i v =
     WindowMsg (Window.TrackWindow i v)
 
 
-toggleAppereanceButton : Model -> Element Msg
+toggleAppereanceButton : { a | settings : { b | theme : Appereance } } -> Element Msg
 toggleAppereanceButton model =
-    row [ spacing 8 ]
-        [ Element.Input.button
-            [ Element.Border.width 0
-            , Element.focused
-                []
-            ]
-            { label = fa "space-station-moon-construction"
-            , onPress = Just <| ToggleAppereance Dark
-            }
-        , Element.Input.button
-            [ Element.Border.width 0
-            , Element.focused
-                []
-            ]
-            { label =
-                if model.settings.theme == Light then
-                    fa "toggle-on"
-
-                else
-                    fa "toggle-off"
-            , onPress =
-                Just <|
-                    ToggleAppereance <|
-                        if model.settings.theme == Light then
-                            Dark
-
-                        else
-                            Light
-            }
-        , Element.Input.button
-            [ Element.Border.width 0
-            , Element.focused
-                []
-            ]
-            { label = fa "starship-freighter"
-            , onPress = Just <| ToggleAppereance Light
-            }
+    Element.Input.button
+        [ Element.Border.width 0
+        , Element.focused []
         ]
+        { label =
+            row [ spacing 6 ]
+                [ faEl [] "space-station-moon-construction"
+                , if model.settings.theme == Light then
+                    faEl [] "toggle-on"
 
+                  else
+                    faEl [] "toggle-off"
+                , faEl [] "starship-freighter"
+                ]
+        , onPress =
+            Just <|
+                ToggleAppereance <|
+                    if model.settings.theme == Light then
+                        Dark
 
-class : String -> Element.Attribute msg
-class =
-    htmlAttribute << Html.Attributes.class
-
-
-fa : String -> Element msg
-fa icon =
-    html
-        (Html.i
-            [ Html.Attributes.class <| "fa-sharp fa-solid " ++ "fa-" ++ icon
-            ]
-            []
-        )
+                    else
+                        Light
+        }
 
 
 getMessage : Message -> Element.Element Msg
@@ -534,6 +310,7 @@ getContext m =
     , lang = De
     , version = 1
     , window = m.window
+    , debug = m.settings.debug
     }
 
 
@@ -546,4 +323,5 @@ getWindowContext m =
     , version = 1
     , window = m.window
     , trackWindow = trackWindow
+    , debug = m.settings.debug
     }

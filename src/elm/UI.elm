@@ -1,5 +1,6 @@
-module UI exposing (UI, UiContext, button, buttonWith, center, class, col, colors, fontSizeSm, root, row, text, whiteSpacePreWrap)
+module UI exposing (..)
 
+import Combinators exposing (vStar)
 import Element exposing (..)
 import Element.Background
 import Element.Border
@@ -126,3 +127,18 @@ class =
 whiteSpacePreWrap : Attribute msg
 whiteSpacePreWrap =
     class "wspw"
+
+
+faEl : List (Element.Attribute msg) -> String -> Element msg
+faEl =
+    vStar el fa
+
+
+fa : String -> Element msg
+fa icon =
+    html
+        (Html.i
+            [ Html.Attributes.class <| "fa-sharp fa-solid " ++ "fa-" ++ icon
+            ]
+            []
+        )

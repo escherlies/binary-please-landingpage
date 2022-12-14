@@ -36,10 +36,16 @@ type alias VersionContext ctx =
     }
 
 
+type alias SettingsContext ctx =
+    { ctx
+        | debug : Bool
+    }
+
+
 
 -- {-| App context composed of all contexts
 -- -}
 
 
 type alias Context a =
-    WithBrowserWindow (UiContext (LangContext (VersionContext a)))
+    SettingsContext (WithBrowserWindow (UiContext (LangContext (VersionContext a))))
