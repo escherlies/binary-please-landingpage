@@ -23,6 +23,6 @@ b1 =
 Point-free or die!
 
 -}
-twoForTwo : (a -> c -> d) -> (b -> c) -> a -> b -> d
-twoForTwo f g x y =
+fgxy__fx_gy : (a -> c -> d) -> (b -> c) -> a -> b -> d
+fgxy__fx_gy f g x y =
     f x (g y)

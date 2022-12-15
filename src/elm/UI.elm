@@ -5,7 +5,7 @@ import Element.Background
 import Element.Border
 import Element.Font
 import Element.Input
-import Extra exposing (twoForTwo)
+import Extra exposing (fgxy__fx_gy)
 import Html exposing (Html)
 import Html.Attributes
 import List exposing (singleton)
@@ -131,7 +131,7 @@ whiteSpacePreWrap =
 
 faEl : List (Element.Attribute msg) -> String -> Element msg
 faEl =
-    twoForTwo el fa
+    fgxy__fx_gy el fa
 
 
 fa : String -> Element msg
