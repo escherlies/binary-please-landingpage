@@ -18,11 +18,11 @@ b1 =
     (<<) << (<<)
 
 
-{-| Vireo Once Removed
+{-| λabcd.ac(bd)
 
-    \a b c d -> a c (b d)
+Point-free or die!
 
 -}
-vStar : (a -> d -> d) -> (b -> d) -> a -> b -> d
-vStar a b c d =
-    a c (b d)
+twoForTwo : (a -> c -> d) -> (b -> c) -> a -> b -> d
+twoForTwo f g x y =
+    f x (g y)
