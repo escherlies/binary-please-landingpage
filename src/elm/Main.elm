@@ -121,7 +121,7 @@ init fd =
                 |> (\m ->
                         { m
                             | windowModel =
-                                Window.init
+                                Window.initWith
                                     (List.map .window <|
                                         windowElements (getWindowContext m) m
                                     )
@@ -265,7 +265,7 @@ windowElements ctx model =
 
 trackWindow : Int -> Math.Vector2.Vec2 -> Msg
 trackWindow i v =
-    WindowMsg (Window.TrackWindow i v)
+    WindowMsg (Window.TrackWindow (Window.Index i) v)
 
 
 toggleAppereanceButton : { a | settings : { b | theme : Appereance } } -> Element Msg
