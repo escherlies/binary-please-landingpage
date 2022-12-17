@@ -220,13 +220,10 @@ view model =
                         (List.map getMessage model.messages)
                     )
                 ]
-                (Window.view WindowMsg
+                (Window.view
+                    WindowMsg
                     model.windowModel
-                    (List.map .render <|
-                        windowElements
-                            (getWindowContext model)
-                            model
-                    )
+                    (windowElements (getWindowContext model) model)
                 )
             )
         ]
