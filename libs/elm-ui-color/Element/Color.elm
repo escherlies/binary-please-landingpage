@@ -1,7 +1,6 @@
 module Element.Color exposing (..)
 
-import Color
-import Color.Internal exposing (Color(..))
+import Color exposing (Color)
 import Element
 import Element.Background
 import Element.Border
@@ -9,8 +8,8 @@ import Element.Font
 
 
 toElementColor : Color.Color -> Element.Color
-toElementColor (Rgba r g b a) =
-    Element.rgba r g b a
+toElementColor =
+    Element.fromRgb << Color.toRgba
 
 
 backgroundColor : Color -> Element.Attr decorative msg
