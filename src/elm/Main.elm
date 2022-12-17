@@ -121,10 +121,7 @@ init fd =
                 |> (\m ->
                         { m
                             | windowModel =
-                                Window.initWith
-                                    (List.map .plane <|
-                                        windowElements (getWindowContext m) m
-                                    )
+                                Window.initWith (windowElements (getWindowContext m) m)
                         }
                    )
             , Cmd.none
