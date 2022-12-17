@@ -8,13 +8,14 @@ import Ports exposing (PortMessage(..))
 import UI exposing (col, fa, text)
 import UI.Theme exposing (Appereance(..))
 import UI.Window exposing (viewElement)
-import Window
-import Window.Plane exposing (zero)
+import Window exposing (Window)
+import Window.Plane
+import Window.Utils exposing (zero)
 
 
-debugWindows : { a | ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : Int -> Math.Vector2.Vec2 -> msg } -> { d | windowModel : { e | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List { window : Window.Window, render : Int -> { f | position : Math.Vector2.Vec2, size : Math.Vector2.Vec2 } -> Element.Element msg }
+debugWindows : { a | ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : Int -> Math.Vector2.Vec2 -> msg } -> { d | windowModel : { e | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List (Window msg)
 debugWindows ctx model =
-    [ { window =
+    [ { plane =
             { position = zero
             , size = vec2 150 200
             }
@@ -35,7 +36,7 @@ debugWindows ctx model =
                     i
                     w
       }
-    , { window =
+    , { plane =
             { position = vec2 200 200
             , size = vec2 250 250
             }
@@ -56,9 +57,9 @@ debugWindows ctx model =
     ]
 
 
-winddowSettings : (c -> Element.Element msg) -> { a | window : Math.Vector2.Vec2, ui : { b | colors : { d | foreground : Element.Color, background : Element.Color } }, trackWindow : e -> Math.Vector2.Vec2 -> msg } -> c -> { window : Window.Window, render : e -> f -> Element.Element msg }
+winddowSettings : (c -> Element.Element msg) -> { a | window : Math.Vector2.Vec2, ui : { b | colors : { d | foreground : Element.Color, background : Element.Color } }, trackWindow : e -> Math.Vector2.Vec2 -> msg } -> c -> { plane : Window.Plane.Plane, render : e -> f -> Element.Element msg }
 winddowSettings toggleAppereanceButton ctx model =
-    { window =
+    { plane =
         Window.bottomRight
             ctx.window
             { position = zero
@@ -80,9 +81,9 @@ winddowSettings toggleAppereanceButton ctx model =
     }
 
 
-windowProject : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { window : Window.Window, render : d -> f -> Element.Element msg }
+windowProject : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
 windowProject ctx _ =
-    { window =
+    { plane =
         Window.center
             ctx.window
             { position = zero
@@ -112,9 +113,9 @@ windowProject ctx _ =
     }
 
 
-windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { window : Window.Window, render : d -> f -> Element.Element msg }
+windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
 windowBinaryPlease ctx _ =
-    { window =
+    { plane =
         Window.center ctx.window
             { position = zero
             , size = vec2 330 260
@@ -144,9 +145,9 @@ windowBinaryPlease ctx _ =
     }
 
 
-legalDisclosure : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { window : Window.Window, render : d -> f -> Element.Element msg }
+legalDisclosure : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
 legalDisclosure ctx _ =
-    { window =
+    { plane =
         Window.center ctx.window
             { position = zero
             , size = vec2 330 260

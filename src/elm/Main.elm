@@ -122,7 +122,7 @@ init fd =
                         { m
                             | windowModel =
                                 Window.initWith
-                                    (List.map .window <|
+                                    (List.map .plane <|
                                         windowElements (getWindowContext m) m
                                     )
                         }
@@ -236,19 +236,13 @@ view model =
     }
 
 
-type alias WindowElement msg =
-    { window : Window
-    , render : Int -> Window -> Element msg
-    }
-
-
 type alias WithTrackWindow a =
     { a
         | trackWindow : Int -> Math.Vector2.Vec2 -> Msg
     }
 
 
-windowElements : Context (WithTrackWindow a) -> Model -> List (WindowElement Msg)
+windowElements : Context (WithTrackWindow a) -> Model -> List (Window Msg)
 windowElements ctx model =
     [ legalDisclosure ctx model
     , windowBinaryPlease ctx model
