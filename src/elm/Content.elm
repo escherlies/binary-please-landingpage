@@ -19,7 +19,7 @@ debugWindows ctx model =
             { position = zero
             , size = vec2 150 200
             }
-                |> Window.move (vec2 50 50)
+                |> Window.Plane.move (vec2 50 50)
       , render =
             \i w ->
                 viewElement
@@ -40,7 +40,7 @@ debugWindows ctx model =
             { position = vec2 200 200
             , size = vec2 250 250
             }
-                |> Window.move (vec2 50 50)
+                |> Window.Plane.move (vec2 50 50)
       , render =
             viewElement
                 ctx
@@ -60,12 +60,12 @@ debugWindows ctx model =
 winddowSettings : (c -> Element.Element msg) -> { a | window : Math.Vector2.Vec2, ui : { b | colors : { d | foreground : Element.Color, background : Element.Color } }, trackWindow : e -> Math.Vector2.Vec2 -> msg } -> c -> { plane : Window.Plane.Plane, render : e -> f -> Element.Element msg }
 winddowSettings toggleAppereanceButton ctx model =
     { plane =
-        Window.bottomRight
+        Window.Plane.bottomRight
             ctx.window
             { position = zero
             , size = vec2 100 100
             }
-            |> Window.move (vec2 -50 -50)
+            |> Window.Plane.move (vec2 -50 -50)
     , render =
         viewElement ctx
             { title = text "Settings"
@@ -84,13 +84,13 @@ winddowSettings toggleAppereanceButton ctx model =
 windowProject : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
 windowProject ctx _ =
     { plane =
-        Window.center
+        Window.Plane.center
             ctx.window
             { position = zero
             , size = vec2 320 240
             }
-            |> Window.centerX ctx.window
-            |> Window.move (vec2 20 0)
+            |> Window.Plane.centerX ctx.window
+            |> Window.Plane.move (vec2 20 0)
     , render =
         viewElement ctx
             { title = text "Projects"
@@ -116,11 +116,11 @@ windowProject ctx _ =
 windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
 windowBinaryPlease ctx _ =
     { plane =
-        Window.center ctx.window
+        Window.Plane.center ctx.window
             { position = zero
             , size = vec2 330 260
             }
-            |> Window.move (vec2 0 -100)
+            |> Window.Plane.move (vec2 0 -100)
     , render =
         viewElement
             ctx
@@ -148,11 +148,11 @@ windowBinaryPlease ctx _ =
 legalDisclosure : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
 legalDisclosure ctx _ =
     { plane =
-        Window.center ctx.window
+        Window.Plane.center ctx.window
             { position = zero
             , size = vec2 330 260
             }
-            |> Window.move (vec2 0 -100)
+            |> Window.Plane.move (vec2 0 -100)
     , render =
         viewElement
             ctx
