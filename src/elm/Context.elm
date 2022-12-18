@@ -42,10 +42,10 @@ type alias SettingsContext ctx =
     }
 
 
+{-| App context composed of all contexts
 
--- {-| App context composed of all contexts
--- -}
+See <https://gist.github.com/escherlies/b03ae740b6eb2048c108f20fbe2c2b26>
 
-
+-}
 type alias Context a =
     SettingsContext (WithBrowserWindow (UiContext (LangContext (VersionContext a))))

@@ -1,48 +1,12 @@
-# Elm-Embed-Boilerplate
+# Binary Please Landing Page
 
-Simple boilerplate to develop widgets or components with Elm using web components.
+[https://binaryplease.com](https://binaryplease.com)
 
-## About
+![](docs/Screenshot.f2a687b.png)
 
-For developing standalone widgets or components in Elm. They will have their own state and runtime so you can use them multiple times.
+An experimaental web app using draggable, resizable rectangles/windows to display content!
 
-## Config
+# Package
 
-Whats included?
+Uses [elm-ui-window](https://github.com/escherlies/elm-ui-window) to render windows :)
 
-### [Elm](https://elm-lang.org/)  
-
-Because writing declarative, purely functional web apps is fun!
-
-### [Elm-UI](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/)
-
-Because no one wants to write CSS!
-
-### [Parcel](https://parceljs.org/)
-
-Because it just works right out-of-the-box.
-
-## Example usage
-
-Import the script and use the custom component.
-
-```html
-<!DOCTYPE html>
-
-<head>
-  <!-- ... -->
-  <script src="widget-path/index.js"></script>
-  <!-- ... -->
-</head>
-
-<body>
-  <!-- ... -->
-  <elm-counter />
-  <elm-counter />
-  <!-- ... -->
-</body>
-```
-
-## Todo
-
-- [ ] Add component interop via flags and ports (advanced use)
