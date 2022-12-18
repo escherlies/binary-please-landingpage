@@ -17,7 +17,7 @@ import Time
 import UI exposing (col, faEl, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
-import Utils exposing (dropRight)
+import Utils exposing (dropRight, liftResult)
 import Window exposing (Window, i_, mapPlane)
 import Window.Plane exposing (move)
 
@@ -47,32 +47,8 @@ subscriptions _ =
 
 
 decodePortMessage : Value -> Msg
-decodePortMessage dv =
-    dv
-        |> D.decodeValue
-            (D.field "tag" D.string
-                |> D.andThen
-                    (\tag ->
-                        case tag of
-                            "UpdatePrefersColorScheme" ->
-                                D.map UpdatePrefersColorScheme (D.field "value" decodeColorScheme)
-
-                            "UpdateBrowserWindow" ->
-                                D.map UpdateBrowserWindow (D.field "value" BrowserWindow.decode)
-
-                            other ->
-                                D.fail <| "Unkowm message type" ++ other
-                    )
-            )
-        |> Result.mapError D.errorToString
-        |> (\r ->
-                case r of
-                    Ok msg ->
-                        PortMsg msg
-
-                    Err s ->
-                        GotError s
-           )
+decodePortMessage =
+    liftResult GotError PortMsg << Ports.decodePortMessage
 
 
 

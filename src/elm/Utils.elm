@@ -13,6 +13,16 @@ dropRight n ls =
         List.take (List.length ls - n) ls
 
 
+liftResult : (error -> a) -> (value -> a) -> Result error value -> a
+liftResult mapError mapValue result =
+    case result of
+        Ok value ->
+            mapValue value
+
+        Err error ->
+            mapError error
+
+
 
 -- Combinators
 
