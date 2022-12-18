@@ -3,6 +3,17 @@ module Utils exposing (..)
 {-| Extra stuff like helpers and utility functions
 -}
 
+
+dropRight : Int -> List a -> List a
+dropRight n ls =
+    if n < 1 then
+        ls
+
+    else
+        List.take (List.length ls - n) ls
+
+
+
 -- Combinators
 
 

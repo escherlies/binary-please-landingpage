@@ -4,6 +4,8 @@ import BrowserWindow exposing (BrowserWindow)
 import Context exposing (Context, Lang(..))
 import Element exposing (alignBottom, alignTop, centerX, centerY, column, el, fill, padding, paragraph, row, spacing, width)
 import Element.Font
+import List exposing (foldl)
+import List.Extra
 import Math.Vector2 exposing (getX, getY, vec2)
 import Ports exposing (PortMessage(..))
 import UI exposing (col, fa, text)
@@ -99,28 +101,89 @@ windowProject ctx _ =
         }
 
 
-windowBinaryPlease : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
-windowBinaryPlease ctx _ =
-    viewElement
-        ctx
-        { title = text "Binary Please UG"
+windowOpenSource : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
+windowOpenSource ctx _ =
+    viewElement ctx
+        { title = text "Source"
         , content =
-            column [ centerX, centerY ]
-                [ text "101010101010011000001010101010101011"
-                , text "101010110100110010101010101010101101"
-                , text "010101010101010101010101010100101010"
-                , text "101001010110101001010101010101010100"
-                , text "010101010101010101011010100101011001"
-                , text "010101101010101010101010101010100101"
-                , text "100101011Next1Gen11Software110101001"
-                , text "101001010101011010100110101010101010"
-                , text "101010101010011000001010101010101011"
-                , text "101000010111010111010110100010101011"
-                , text "101000101010101001011001010101010101"
-                , text "101001100110101010101101010101011011"
-                , text "011001101010100101010101010101010101"
+            col [ centerX, centerY, width fill, padding 40 ]
+                [ Element.newTabLink
+                    [ centerX ]
+                    { url = "https://www.hyhyve.com/"
+                    , label =
+                        row [ spacing 12, width fill ]
+                            [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
+                            , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
+                            , Element.paragraph [ alignTop ]
+                                [ text " (Online events that are fun!)"
+                                ]
+                            ]
+                    }
                 ]
         }
+
+
+windowBinaryPlease : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> { b | random : List Int } -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
+windowBinaryPlease ctx model =
+    viewElement
+        ctx
+        { title = text "Binary Please"
+        , content =
+            column [ centerX ] <|
+                (model.random
+                    |> List.map String.fromInt
+                    |> List.Extra.groupsOf 36
+                    |> List.map String.concat
+                    |> mapAt 4 (replaceAtCenter "Build with")
+                    |> mapAt 6 (replaceAtCenter "Purely functional programming")
+                    |> mapAt 8 (replaceAtCenter "<3")
+                    |> List.map text
+                )
+        }
+
+
+mapAt : Int -> (a -> a) -> List a -> List a
+mapAt ix fn lst =
+    List.Extra.getAt ix lst
+        |> Maybe.map fn
+        |> Maybe.map (\v -> List.Extra.setAt ix v lst)
+        |> Maybe.withDefault lst
+
+
+replaceAtCenter : String -> String -> String
+replaceAtCenter source target =
+    let
+        targetLength =
+            String.length target
+
+        sourceLength =
+            String.length source
+    in
+    replaceAt (targetLength // 2 - sourceLength // 2) source target
+
+
+replaceAt : Int -> String -> String -> String
+replaceAt ix source target =
+    let
+        words =
+            String.words source
+    in
+    foldl
+        (\word ( offset, acc ) ->
+            ( offset + String.length word + 1, replaceWordAt offset word acc )
+        )
+        ( ix, target )
+        words
+        |> Tuple.second
+
+
+replaceWordAt : Int -> String -> String -> String
+replaceWordAt ix source target =
+    String.slice 0 ix target ++ source ++ String.slice (ix + String.length source) (String.length target) target
+
+
+
+--
 
 
 legalDisclosure : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg

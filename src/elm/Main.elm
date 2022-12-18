@@ -12,9 +12,12 @@ import Json.Decode as D exposing (Decoder, Value)
 import List exposing (map)
 import Math.Vector2 exposing (vec2)
 import Ports exposing (PortMessage(..))
+import Random
+import Time
 import UI exposing (col, faEl, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
+import Utils exposing (dropRight)
 import Window exposing (Window, i_, mapPlane)
 import Window.Plane exposing (move)
 
@@ -39,6 +42,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
         [ portReceive decodePortMessage
+        , Time.every 100 GotTime
         ]
 
 
@@ -98,6 +102,7 @@ type alias Model =
         }
     , windowModel : Window.Model
     , window : BrowserWindow
+    , random : List Int
     }
 
 
@@ -119,11 +124,11 @@ init fd =
                     }
               , windowModel = Window.empty
               , window = f.window
+              , random = []
               }
                 |> (\m ->
                         { m
-                            | windowModel =
-                                Window.initWith (windowElements (getContext m) m)
+                            | windowModel = Window.initWith (windowElements (getContext m) m)
                         }
                    )
             , Cmd.none
@@ -155,11 +160,28 @@ type Msg
     | GotError String
     | WindowMsg Window.Msg
     | PortMsg Ports.PortMessage
+    | GotTime Time.Posix
+    | GotRandom (List Int)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        GotRandom r ->
+            ( { model
+                | random =
+                    if List.length model.random < (13 * 36) then
+                        r ++ model.random
+
+                    else
+                        r ++ dropRight 36 model.random
+              }
+            , Cmd.none
+            )
+
+        GotTime _ ->
+            ( model, Random.generate GotRandom (Random.list 36 (Random.int 0 1)) )
+
         PortMsg pm ->
             handlePortMessages pm model
 
@@ -238,33 +260,41 @@ spread ctx ws =
         n =
             List.length ws
 
+        d =
+            48
+
         xs =
             List.range 1 n
-                |> map (i_ (*) 35)
-                |> map (i_ (-) (n * 40 // 2))
+                |> map (i_ (*) d)
+                |> map (i_ (-) (n * d // 2))
                 |> map (i_ (*) -1)
                 |> map toFloat
 
         ys =
             List.range 1 n
-                |> map (i_ (*) 35)
-                |> map (i_ (-) (n * 40 // 2))
+                |> map (i_ (*) d)
+                |> map (i_ (-) (n * d // 2))
                 |> map toFloat
 
         moves =
             List.map2 vec2 xs ys
     in
+    -- Apply spread move to each window accordingly
     List.map2 (mapPlane << move) moves (List.map (mapPlane (always (defaultPlane ctx))) ws)
+        -- Move a little bit up because of humans
+        |> List.map (mapPlane (move (vec2 0 -50)))
 
 
 windowElements : Context a -> Model -> List (Window Msg)
 windowElements ctx model =
     spread ctx
-        [ Window initPlane (legalDisclosure ctx model)
-        , Window initPlane (winddowSettings toggleAppereanceButton ctx model)
-        , Window initPlane (windowBinaryPlease ctx model)
-        , Window initPlane (windowProject ctx model)
-        ]
+        (map (Window initPlane)
+            [ legalDisclosure ctx model
+            , winddowSettings toggleAppereanceButton ctx model
+            , windowBinaryPlease ctx model
+            , windowProject ctx model
+            ]
+        )
         ++ (if ctx.debug then
                 debugWindows ctx model
 
