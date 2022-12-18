@@ -2,8 +2,8 @@ module UI.Window exposing (..)
 
 import Context exposing (Context)
 import Element exposing (Element, clip, column, el, fill, height, padding, px, row, scrollbars, width)
-import Element.Background
 import Element.Border
+import Element.Color
 import Element.Font
 import UI
 import Window exposing (cursor, trackWindowAttr, userSelect)
@@ -20,13 +20,13 @@ viewElement ctx { title, content } toMsg ix _ =
         [ Element.Border.width 2
         , width fill
         , height fill
-        , Element.Border.shadow
+        , Element.Color.borderShadow
             { offset = ( 3, 3 )
             , blur = 0
             , color = ctx.ui.colors.foreground
             , size = 0
             }
-        , Element.Background.color ctx.ui.colors.background
+        , Element.Color.backgroundColor ctx.ui.colors.background
         ]
         [ row
             ([ height (px 40)

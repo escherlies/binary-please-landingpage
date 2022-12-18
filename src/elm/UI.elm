@@ -1,8 +1,8 @@
 module UI exposing (..)
 
 import Element exposing (..)
-import Element.Background
 import Element.Border
+import Element.Color
 import Element.Font
 import Element.Input
 import Html exposing (Html)
@@ -27,8 +27,8 @@ root : UiContext a -> Element msg -> Html msg
 root ctx =
     layout
         [ fontSizeNormal
-        , Element.Background.color ctx.ui.colors.background
-        , Element.Font.color ctx.ui.colors.foreground
+        , Element.Color.backgroundColor ctx.ui.colors.background
+        , Element.Color.fontColor ctx.ui.colors.foreground
         , width fill
         , height fill
         , Element.Font.family

@@ -1,7 +1,6 @@
 module UI.Color exposing (..)
 
-import Element exposing (Color)
-import Element.Color exposing (toElementColor)
+import Color exposing (Color)
 import UI.Theme exposing (Appereance, Theme, ThemeType(..), getTheme)
 
 
@@ -15,8 +14,8 @@ fromThemeType : ThemeType -> Colors
 fromThemeType t =
     case t of
         Duotone fg bg ->
-            { foreground = toElementColor fg
-            , background = toElementColor bg
+            { foreground = fg
+            , background = bg
             }
 
 
