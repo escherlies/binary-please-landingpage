@@ -1,4 +1,4 @@
-module Extra exposing (..)
+module Utils exposing (..)
 
 {-| Extra stuff like helpers and utility functions
 -}

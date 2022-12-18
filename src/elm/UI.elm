@@ -5,11 +5,11 @@ import Element.Background
 import Element.Border
 import Element.Font
 import Element.Input
-import Extra exposing (fgxy__fx_gy)
 import Html exposing (Html)
 import Html.Attributes
 import List exposing (singleton)
 import UI.Color
+import Utils exposing (fgxy__fx_gy)
 
 
 type alias UI =
