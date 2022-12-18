@@ -27,6 +27,21 @@ liftResult mapError mapValue result =
 -- Combinators
 
 
+{-| Just an idea...
+
+See <https://gist.github.com/escherlies/de92514ecdc295f0a098d41609d8677a>
+
+-}
+i_ : (c -> b -> a) -> b -> c -> a
+i_ =
+    flip
+
+
+flip : (c -> b -> a) -> b -> c -> a
+flip fn a b =
+    fn b a
+
+
 {-| Blackbird
 
     \a b c d -> a (b c d)

@@ -1,17 +1,14 @@
 module UI.Window exposing (..)
 
 import Context exposing (Context)
-import Element exposing (Element, clip, column, el, fill, height, padding, px, row, scrollbars, width)
+import Element exposing (Element, clip, column, el, fill, height, htmlAttribute, padding, px, row, scrollbars, width)
 import Element.Border
 import Element.Color
 import Element.Font
+import Html.Attributes
 import UI
-import Window exposing (cursor, trackWindowAttr, userSelect)
+import Window exposing (onDrag)
 import Window.Plane exposing (Plane)
-
-
-type alias WindowElement msg =
-    { title : Element msg, content : Element msg }
 
 
 viewElement : Context a -> { d | title : Element msg, content : Element msg } -> (Window.Msg -> msg) -> Int -> Plane -> Element msg
@@ -37,7 +34,7 @@ viewElement ctx { title, content } toMsg ix _ =
                 , right = 0
                 , bottom = 2
                 }
-             , trackWindowAttr toMsg ix
+             , onDrag toMsg ix
              , cursor "move"
              , padding 8
              , Element.Font.semiBold
@@ -54,4 +51,23 @@ viewElement ctx { title, content } toMsg ix _ =
             ]
           <|
             content
+        ]
+
+
+cursor : String -> Element.Attribute msg
+cursor =
+    htmlAttribute << Html.Attributes.style "cursor"
+
+
+userSelect : Bool -> List (Element.Attribute msg)
+userSelect val =
+    if val then
+        []
+
+    else
+        [ htmlAttribute (Html.Attributes.style "user-select" "none")
+        , htmlAttribute (Html.Attributes.style "-ms-user-select" "none")
+        , htmlAttribute (Html.Attributes.style "-moz-user-select" "none")
+        , htmlAttribute (Html.Attributes.style "-webkit-user-select" "none")
+        , htmlAttribute (Html.Attributes.style "-webkit-touch-callout" "none")
         ]

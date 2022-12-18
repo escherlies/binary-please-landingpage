@@ -18,8 +18,8 @@ import Time
 import UI exposing (col, faEl, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
-import Utils exposing (dropRight, liftResult)
-import Window exposing (Window, i_, mapPlane)
+import Utils exposing (dropRight, i_, liftResult)
+import Window exposing (Window, mapPlane)
 import Window.Plane exposing (move)
 
 
@@ -99,7 +99,7 @@ init fd =
                     { theme = f.prefersColorScheme
                     , debug = False
                     }
-              , windowModel = Window.empty
+              , windowModel = Window.init
               , window = f.window
               , random = []
               }
@@ -191,7 +191,7 @@ handlePortMessages pm model =
             ( { model | window = window }
             , msgCmd
                 (WindowMsg
-                    (Window.UpdatePlanes <|
+                    (Window.updatePlanes <|
                         List.map .plane
                             (windows (getContext model |> (\c -> { c | window = window })) model)
                     )
