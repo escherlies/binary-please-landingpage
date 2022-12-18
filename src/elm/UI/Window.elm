@@ -1,5 +1,6 @@
 module UI.Window exposing (..)
 
+import Context exposing (Context)
 import Element exposing (Element, clip, column, el, fill, height, htmlAttribute, padding, px, row, scrollbars, width)
 import Element.Background
 import Element.Border
@@ -15,8 +16,8 @@ type alias WindowElement msg =
     { title : Element msg, content : Element msg }
 
 
-viewElement : { a | ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> { e | title : Element msg, content : Element msg } -> d -> f -> Element msg
-viewElement ctx { title, content } ix _ =
+viewElement : Context a -> { d | title : Element msg, content : Element msg } -> (e -> Math.Vector2.Vec2 -> msg) -> e -> f -> Element msg
+viewElement ctx { title, content } trackWindow ix _ =
     column
         [ Element.Border.width 2
         , width fill
@@ -40,7 +41,7 @@ viewElement ctx { title, content } ix _ =
                 }
              , htmlAttribute
                 (Html.Events.on "pointerdown"
-                    (D.map (ctx.trackWindow ix)
+                    (D.map (trackWindow ix)
                         (D.map2 vec2
                             (D.field "clientX" D.float)
                             (D.field "clientY" D.float)

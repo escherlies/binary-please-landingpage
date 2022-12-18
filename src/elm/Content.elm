@@ -1,6 +1,6 @@
 module Content exposing (..)
 
-import Context exposing (Lang(..))
+import Context exposing (Context, Lang(..))
 import Element exposing (alignBottom, alignTop, centerX, centerY, column, el, fill, padding, paragraph, row, spacing, width)
 import Element.Font
 import Math.Vector2 exposing (getX, getY, vec2)
@@ -13,7 +13,7 @@ import Window.Plane
 import Window.Utils exposing (zero)
 
 
-debugWindows : { a | ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : Int -> Math.Vector2.Vec2 -> msg } -> { d | windowModel : { e | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List (Window msg)
+debugWindows : Context a -> { b | windowModel : { c | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List (Window msg)
 debugWindows ctx model =
     [ { plane =
             { position = zero
@@ -21,7 +21,7 @@ debugWindows ctx model =
             }
                 |> Window.Plane.move (vec2 50 50)
       , render =
-            \i w ->
+            \tw i w ->
                 viewElement
                     ctx
                     { title = text <| "ix = " ++ String.fromInt i
@@ -33,6 +33,7 @@ debugWindows ctx model =
                             , text <| "h = " ++ String.fromFloat (getY w.size)
                             ]
                     }
+                    tw
                     i
                     w
       }
@@ -57,7 +58,7 @@ debugWindows ctx model =
     ]
 
 
-winddowSettings : (c -> Element.Element msg) -> { a | window : Math.Vector2.Vec2, ui : { b | colors : { d | foreground : Element.Color, background : Element.Color } }, trackWindow : e -> Math.Vector2.Vec2 -> msg } -> c -> { plane : Window.Plane.Plane, render : e -> f -> Element.Element msg }
+winddowSettings : (c -> Element.Element msg) -> Context a -> c -> Window msg
 winddowSettings toggleAppereanceButton ctx model =
     { plane =
         Window.Plane.bottomRight
@@ -81,7 +82,7 @@ winddowSettings toggleAppereanceButton ctx model =
     }
 
 
-windowProject : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
+windowProject : Context a -> b -> Window msg
 windowProject ctx _ =
     { plane =
         Window.Plane.center
@@ -113,7 +114,7 @@ windowProject ctx _ =
     }
 
 
-windowBinaryPlease : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
+windowBinaryPlease : Context a -> b -> Window msg
 windowBinaryPlease ctx _ =
     { plane =
         Window.Plane.center ctx.window
@@ -145,7 +146,7 @@ windowBinaryPlease ctx _ =
     }
 
 
-legalDisclosure : { a | window : Math.Vector2.Vec2, ui : { b | colors : { c | foreground : Element.Color, background : Element.Color } }, trackWindow : d -> Math.Vector2.Vec2 -> msg } -> e -> { plane : Window.Plane.Plane, render : d -> f -> Element.Element msg }
+legalDisclosure : Context a -> b -> Window msg
 legalDisclosure ctx _ =
     { plane =
         Window.Plane.center ctx.window

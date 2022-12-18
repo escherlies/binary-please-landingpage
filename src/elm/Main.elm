@@ -121,7 +121,7 @@ init fd =
                 |> (\m ->
                         { m
                             | windowModel =
-                                Window.initWith (windowElements (getWindowContext m) m)
+                                Window.initWith (windowElements (getContext m) m)
                         }
                    )
             , Cmd.none
@@ -223,20 +223,14 @@ view model =
                 (Window.view
                     WindowMsg
                     model.windowModel
-                    (windowElements (getWindowContext model) model)
+                    (windowElements ctx model)
                 )
             )
         ]
     }
 
 
-type alias WithTrackWindow a =
-    { a
-        | trackWindow : Int -> Math.Vector2.Vec2 -> Msg
-    }
-
-
-windowElements : Context (WithTrackWindow a) -> Model -> List (Window Msg)
+windowElements : Context a -> Model -> List (Window Msg)
 windowElements ctx model =
     [ legalDisclosure ctx model
     , windowBinaryPlease ctx model
@@ -249,11 +243,6 @@ windowElements ctx model =
             else
                 []
            )
-
-
-trackWindow : Int -> Math.Vector2.Vec2 -> Msg
-trackWindow i v =
-    WindowMsg (Window.TrackWindow (Window.Index i) v)
 
 
 toggleAppereanceButton : { a | settings : { b | theme : Appereance } } -> Element Msg
@@ -302,14 +291,15 @@ getContext m =
     }
 
 
-getWindowContext : Model -> WithTrackWindow (Context {})
-getWindowContext m =
-    { ui =
-        { colors = UI.Color.fromTheme UI.Theme.theme1 m.settings.theme
-        }
-    , lang = De
-    , version = 1
-    , window = m.window
-    , trackWindow = trackWindow
-    , debug = m.settings.debug
-    }
+
+-- getWindowContext : Model ->  (Context {})
+-- getWindowContext m =
+--     { ui =
+--         { colors = UI.Color.fromTheme UI.Theme.theme1 m.settings.theme
+--         }
+--     , lang = De
+--     , version = 1
+--     , window = m.window
+--     , trackWindow = trackWindow
+--     , debug = m.settings.debug
+--     }
