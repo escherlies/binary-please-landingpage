@@ -105,7 +105,7 @@ init fd =
               }
                 |> (\m ->
                         { m
-                            | windowModel = Window.initWith (windowElements (getContext m) m)
+                            | windowModel = Window.initWith (windows (getContext m) m)
                         }
                    )
             , Cmd.none
@@ -193,7 +193,7 @@ handlePortMessages pm model =
                 (WindowMsg
                     (Window.UpdatePlanes <|
                         List.map .plane
-                            (windowElements (getContext model |> (\c -> { c | window = window })) model)
+                            (windows (getContext model |> (\c -> { c | window = window })) model)
                     )
                 )
             )
@@ -241,7 +241,7 @@ view model =
                 (Window.view
                     WindowMsg
                     model.windowModel
-                    (windowElements ctx model)
+                    (windows ctx model)
                 )
             )
         ]
@@ -279,15 +279,15 @@ spread ctx ws =
         |> List.map (mapPlane (move (vec2 0 -50)))
 
 
-windowElements : Context a -> Model -> List (Window Msg)
-windowElements ctx model =
+windows : Context a -> Model -> List (Window Msg)
+windows ctx model =
     spread ctx
         (map (Window initPlane)
             [ legalDisclosure ctx model
             , winddowSettings toggleAppereanceButton ctx model
             , windowBinaryPlease ctx model
-            , windowProject ctx model
             , windowOpenSource ctx model
+            , windowProject ctx model
             ]
         )
         ++ (if ctx.debug then
