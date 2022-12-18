@@ -1,23 +1,21 @@
 module UI.Window exposing (..)
 
 import Context exposing (Context)
-import Element exposing (Element, clip, column, el, fill, height, htmlAttribute, padding, px, row, scrollbars, width)
+import Element exposing (Element, clip, column, el, fill, height, padding, px, row, scrollbars, width)
 import Element.Background
 import Element.Border
 import Element.Font
-import Html.Events
-import Json.Decode as D
-import Math.Vector2 exposing (vec2)
 import UI
-import Window exposing (cursor, userSelect)
+import Window exposing (cursor, trackWindowAttr, userSelect)
+import Window.Plane exposing (Plane)
 
 
 type alias WindowElement msg =
     { title : Element msg, content : Element msg }
 
 
-viewElement : Context a -> { d | title : Element msg, content : Element msg } -> (e -> Math.Vector2.Vec2 -> msg) -> e -> f -> Element msg
-viewElement ctx { title, content } trackWindow ix _ =
+viewElement : Context a -> { d | title : Element msg, content : Element msg } -> (Window.Msg -> msg) -> Int -> Plane -> Element msg
+viewElement ctx { title, content } toMsg ix _ =
     column
         [ Element.Border.width 2
         , width fill
@@ -39,15 +37,7 @@ viewElement ctx { title, content } trackWindow ix _ =
                 , right = 0
                 , bottom = 2
                 }
-             , htmlAttribute
-                (Html.Events.on "pointerdown"
-                    (D.map (trackWindow ix)
-                        (D.map2 vec2
-                            (D.field "clientX" D.float)
-                            (D.field "clientY" D.float)
-                        )
-                    )
-                )
+             , trackWindowAttr toMsg ix
              , cursor "move"
              , padding 8
              , Element.Font.semiBold
