@@ -134,9 +134,9 @@ windowBinaryPlease ctx model =
                     |> List.map String.fromInt
                     |> List.Extra.groupsOf 36
                     |> List.map String.concat
-                    |> mapAt 4 (replaceAtCenter "Build with")
-                    |> mapAt 6 (replaceAtCenter "Purely functional programming")
-                    |> mapAt 8 (replaceAtCenter "<3")
+                    |> mapAt 4 (replaceAtCenter "_Build with_")
+                    |> mapAt 6 (replaceAtCenter "_Purely functional programming_")
+                    |> mapAt 8 (replaceAtCenter "_<3_")
                     |> List.map text
                 )
         }
