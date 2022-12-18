@@ -9,7 +9,7 @@ import Html exposing (Html)
 import Html.Attributes
 import List exposing (singleton)
 import UI.Color
-import Utils exposing (b1, fgxy__fx_gy)
+import Utils exposing (b1, verschränkt)
 
 
 type alias UI =
@@ -141,7 +141,7 @@ whiteSpaceNoWrap =
 
 faEl : List (Element.Attribute msg) -> String -> Element msg
 faEl =
-    fgxy__fx_gy el fa
+    verschränkt el fa
 
 
 fa : String -> Element msg

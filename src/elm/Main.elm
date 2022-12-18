@@ -13,6 +13,7 @@ import List exposing (map)
 import Math.Vector2 exposing (vec2)
 import Ports exposing (PortMessage(..))
 import Random
+import Task
 import Time
 import UI exposing (col, faEl, root, text)
 import UI.Color
@@ -187,10 +188,23 @@ handlePortMessages : PortMessage -> Model -> ( Model, Cmd Msg )
 handlePortMessages pm model =
     case pm of
         UpdateBrowserWindow window ->
-            ( { model | window = window }, Cmd.none )
+            ( { model | window = window }
+            , msgCmd
+                (WindowMsg
+                    (Window.UpdatePlanes <|
+                        List.map .plane
+                            (windowElements (getContext model |> (\c -> { c | window = window })) model)
+                    )
+                )
+            )
 
         UpdatePrefersColorScheme scheme ->
             ( { model | settings = model.settings |> (\s -> { s | theme = scheme }) }, Cmd.none )
+
+
+msgCmd : Msg -> Cmd Msg
+msgCmd =
+    Task.perform identity << Task.succeed
 
 
 view : Model -> Document Msg

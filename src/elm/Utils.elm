@@ -44,6 +44,6 @@ b1 =
 Point-free or die!
 
 -}
-fgxy__fx_gy : (a -> c -> d) -> (b -> c) -> a -> b -> d
-fgxy__fx_gy f g x y =
+verschränkt : (a -> c -> d) -> (b -> c) -> a -> b -> d
+verschränkt f g x y =
     f x (g y)
