@@ -2,19 +2,21 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import BrowserWindow exposing (BrowserWindow)
-import Content exposing (debugWindows, legalDisclosure, winddowSettings, windowBinaryPlease, windowProject)
+import Content exposing (debugWindows, defaultPlane, initPlane, legalDisclosure, winddowSettings, windowBinaryPlease, windowProject)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, el, fill, height, row, spacing, width)
 import Element.Border
 import Element.Input
 import Html
 import Json.Decode as D exposing (Decoder, Value)
+import List exposing (map)
 import Math.Vector2 exposing (vec2)
 import Ports exposing (PortMessage(..))
 import UI exposing (col, faEl, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
-import Window exposing (Window)
+import Window exposing (Window, i_, mapPlane)
+import Window.Plane exposing (move)
 
 
 type alias Flags =
@@ -230,13 +232,39 @@ view model =
     }
 
 
+spread : { a | window : Math.Vector2.Vec2 } -> List (Window msg) -> List (Window msg)
+spread ctx ws =
+    let
+        n =
+            List.length ws
+
+        xs =
+            List.range 1 n
+                |> map (i_ (*) 35)
+                |> map (i_ (-) (n * 40 // 2))
+                |> map (i_ (*) -1)
+                |> map toFloat
+
+        ys =
+            List.range 1 n
+                |> map (i_ (*) 35)
+                |> map (i_ (-) (n * 40 // 2))
+                |> map toFloat
+
+        moves =
+            List.map2 vec2 xs ys
+    in
+    List.map2 (mapPlane << move) moves (List.map (mapPlane (always (defaultPlane ctx))) ws)
+
+
 windowElements : Context a -> Model -> List (Window Msg)
 windowElements ctx model =
-    [ legalDisclosure ctx model
-    , windowBinaryPlease ctx model
-    , windowProject ctx model
-    , winddowSettings toggleAppereanceButton ctx model
-    ]
+    spread ctx
+        [ Window initPlane (legalDisclosure ctx model)
+        , Window initPlane (winddowSettings toggleAppereanceButton ctx model)
+        , Window initPlane (windowBinaryPlease ctx model)
+        , Window initPlane (windowProject ctx model)
+        ]
         ++ (if ctx.debug then
                 debugWindows ctx model
 

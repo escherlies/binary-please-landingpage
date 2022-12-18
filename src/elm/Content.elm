@@ -1,5 +1,6 @@
 module Content exposing (..)
 
+import BrowserWindow exposing (BrowserWindow)
 import Context exposing (Context, Lang(..))
 import Element exposing (alignBottom, alignTop, centerX, centerY, column, el, fill, padding, paragraph, row, spacing, width)
 import Element.Font
@@ -13,13 +14,20 @@ import Window.Plane
 import Window.Utils exposing (zero)
 
 
+initPlane : Window.Plane.Plane
+initPlane =
+    { position = zero, size = vec2 330 260 }
+
+
+defaultPlane : { a | window : Math.Vector2.Vec2 } -> Window.Plane.Plane
+defaultPlane ctx =
+    initPlane
+        |> Window.Plane.center ctx.window
+
+
 debugWindows : Context a -> { b | windowModel : { c | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List (Window msg)
 debugWindows ctx model =
-    [ { plane =
-            { position = zero
-            , size = vec2 150 200
-            }
-                |> Window.Plane.move (vec2 50 50)
+    [ { plane = defaultPlane ctx
       , render =
             \tw i w ->
                 viewElement
@@ -37,11 +45,7 @@ debugWindows ctx model =
                     i
                     w
       }
-    , { plane =
-            { position = vec2 200 200
-            , size = vec2 250 250
-            }
-                |> Window.Plane.move (vec2 50 50)
+    , { plane = defaultPlane ctx
       , render =
             viewElement
                 ctx
@@ -58,127 +62,93 @@ debugWindows ctx model =
     ]
 
 
-winddowSettings : (c -> Element.Element msg) -> Context a -> c -> Window msg
+winddowSettings : (c -> Element.Element msg) -> Context a -> c -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
 winddowSettings toggleAppereanceButton ctx model =
-    { plane =
-        Window.Plane.bottomRight
-            ctx.window
-            { position = zero
-            , size = vec2 100 100
-            }
-            |> Window.Plane.move (vec2 -50 -50)
-    , render =
-        viewElement ctx
-            { title = text "Settings"
-            , content =
-                col [ centerX, centerY ]
-                    [ el
-                        [ alignBottom
-                        , centerX
-                        ]
-                        (toggleAppereanceButton model)
+    viewElement ctx
+        { title = text "Settings"
+        , content =
+            col [ centerX, centerY ]
+                [ el
+                    [ alignBottom
+                    , centerX
                     ]
-            }
-    }
+                    (toggleAppereanceButton model)
+                ]
+        }
 
 
-windowProject : Context a -> b -> Window msg
+windowProject : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
 windowProject ctx _ =
-    { plane =
-        Window.Plane.center
-            ctx.window
-            { position = zero
-            , size = vec2 320 240
-            }
-            |> Window.Plane.centerX ctx.window
-            |> Window.Plane.move (vec2 20 0)
-    , render =
-        viewElement ctx
-            { title = text "Projects"
-            , content =
-                col [ centerX, centerY, width fill, padding 40 ]
-                    [ Element.newTabLink
-                        [ centerX ]
-                        { url = "https://www.hyhyve.com/"
-                        , label =
-                            row [ spacing 12, width fill ]
-                                [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
-                                , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
-                                , Element.paragraph [ alignTop ]
-                                    [ text " (Online events that are fun!)"
-                                    ]
+    viewElement ctx
+        { title = text "Projects"
+        , content =
+            col [ centerX, centerY, width fill, padding 40 ]
+                [ Element.newTabLink
+                    [ centerX ]
+                    { url = "https://www.hyhyve.com/"
+                    , label =
+                        row [ spacing 12, width fill ]
+                            [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
+                            , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
+                            , Element.paragraph [ alignTop ]
+                                [ text " (Online events that are fun!)"
                                 ]
-                        }
-                    ]
-            }
-    }
+                            ]
+                    }
+                ]
+        }
 
 
-windowBinaryPlease : Context a -> b -> Window msg
+windowBinaryPlease : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
 windowBinaryPlease ctx _ =
-    { plane =
-        Window.Plane.center ctx.window
-            { position = zero
-            , size = vec2 330 260
-            }
-            |> Window.Plane.move (vec2 0 -100)
-    , render =
-        viewElement
-            ctx
-            { title = text "Binary Please UG"
-            , content =
-                column [ centerX, centerY ]
-                    [ text "101010101010011000001010101010101011"
-                    , text "101010110100110010101010101010101101"
-                    , text "010101010101010101010101010100101010"
-                    , text "101001010110101001010101010101010100"
-                    , text "010101010101010101011010100101011001"
-                    , text "010101101010101010101010101010100101"
-                    , text "100101011Next1Gen11Software110101001"
-                    , text "101001010101011010100110101010101010"
-                    , text "101010101010011000001010101010101011"
-                    , text "101000010111010111010110100010101011"
-                    , text "101000101010101001011001010101010101"
-                    , text "101001100110101010101101010101011011"
-                    , text "011001101010100101010101010101010101"
-                    ]
-            }
-    }
+    viewElement
+        ctx
+        { title = text "Binary Please UG"
+        , content =
+            column [ centerX, centerY ]
+                [ text "101010101010011000001010101010101011"
+                , text "101010110100110010101010101010101101"
+                , text "010101010101010101010101010100101010"
+                , text "101001010110101001010101010101010100"
+                , text "010101010101010101011010100101011001"
+                , text "010101101010101010101010101010100101"
+                , text "100101011Next1Gen11Software110101001"
+                , text "101001010101011010100110101010101010"
+                , text "101010101010011000001010101010101011"
+                , text "101000010111010111010110100010101011"
+                , text "101000101010101001011001010101010101"
+                , text "101001100110101010101101010101011011"
+                , text "011001101010100101010101010101010101"
+                ]
+        }
 
 
-legalDisclosure : Context a -> b -> Window msg
+legalDisclosure : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
 legalDisclosure ctx _ =
-    { plane =
-        Window.Plane.center ctx.window
-            { position = zero
-            , size = vec2 330 260
-            }
-            |> Window.Plane.move (vec2 0 -100)
-    , render =
-        viewElement
-            ctx
-            { title = text "Legal disclosure"
-            , content =
-                column [ centerX, centerY, spacing 14 ] <|
-                    List.map
-                        (\t ->
-                            column []
-                                (List.map
-                                    (\t2 ->
-                                        if String.startsWith "#" t2 then
-                                            paragraph [ Element.Font.bold ] [ text t2 ]
+    viewElement
+        ctx
+        { title = text "Legal disclosure"
+        , content =
+            column [ centerX, centerY, spacing 14 ] <|
+                List.map
+                    (\t ->
+                        column []
+                            (List.map
+                                (\t2 ->
+                                    if String.startsWith "#" t2 then
+                                        paragraph [ Element.Font.bold ] [ text t2 ]
 
-                                        else
-                                            paragraph
-                                                [ UI.whiteSpacePreWrap ]
-                                                [ text t2 ]
-                                    )
-                                    (String.lines t)
+                                    else
+                                        paragraph
+                                            [ UI.whiteSpacePreWrap ]
+                                            [ text t2 ]
                                 )
-                        )
-                    <|
-                        String.split "\n\n"
-                            """
+                                (String.lines t)
+                            )
+                    )
+                <|
+                    String.split "\n\n"
+                        """
 # Legal disclosure
 
 Information in accordance with Section 5 TMG
@@ -211,5 +181,4 @@ VAT identification number in accordance with Section 27 an of the German VAT act
 
 The contents of binaryplease.com, unless otherwise stated, is protected by copyright.
 """
-            }
-    }
+        }
