@@ -27,6 +27,10 @@ defaultPlane ctx =
         |> Window.Plane.center ctx.window
 
 
+
+-- Misc
+
+
 debugWindows : Context a -> { b | windowModel : { c | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List (Window msg)
 debugWindows ctx model =
     [ { plane = defaultPlane ctx
@@ -79,48 +83,76 @@ winddowSettings toggleAppereanceButton ctx model =
         }
 
 
+
+-- Projects
+
+
+projectWithDescriptionBelow : { a | url : String, title : String, description : String } -> Element.Element msg
+projectWithDescriptionBelow { url, title, description } =
+    Element.newTabLink
+        []
+        { url = url
+        , label =
+            row [ spacing 12, width fill ]
+                [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
+                , column [ width fill, spacing 8 ]
+                    [ el [ Element.Font.bold, alignTop, UI.whiteSpaceNoWrap ] <| text title
+                    , Element.paragraph [ alignTop ]
+                        [ text description
+                        ]
+                    ]
+                ]
+        }
+
+
 windowProject : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
 windowProject ctx _ =
     viewElement ctx
         { title = text "Projects"
         , content =
-            col [ centerX, centerY, width fill, padding 40 ]
-                [ Element.newTabLink
-                    [ centerX ]
-                    { url = "https://www.hyhyve.com/"
-                    , label =
-                        row [ spacing 12, width fill ]
-                            [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
-                            , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
-                            , Element.paragraph [ alignTop ]
-                                [ text " (Online events that are fun!)"
-                                ]
-                            ]
-                    }
-                ]
+            col [ centerX, centerY, width fill, padding 20, spacing 20 ] <|
+                List.map projectWithDescriptionBelow
+                    [ { url = "https://www.hyhyve.com/"
+                      , title = "HyHyve"
+                      , description = "Online events that are fun!"
+                      }
+                    , { url = "https://www.coffeechat.ai/"
+                      , title = "CoffeeChat.ai"
+                      , description = "Facilitate intra-company communications with scheduled meetings."
+                      }
+                    ]
         }
 
 
 windowOpenSource : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
 windowOpenSource ctx _ =
     viewElement ctx
-        { title = text "Source"
+        { title = text "Open Source"
         , content =
-            col [ centerX, centerY, width fill, padding 40 ]
-                [ Element.newTabLink
-                    [ centerX ]
-                    { url = "https://www.hyhyve.com/"
-                    , label =
-                        row [ spacing 12, width fill ]
-                            [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
-                            , el [ Element.Font.bold, alignTop ] <| text "HyHyve"
-                            , Element.paragraph [ alignTop ]
-                                [ text " (Online events that are fun!)"
-                                ]
-                            ]
-                    }
-                ]
+            col [ centerX, centerY, width fill, padding 20, spacing 20 ] <|
+                List.map projectWithDescriptionBelow
+                    [ { url = "https://github.com/escherlies/elm-color"
+                      , title = "elm-color"
+                      , description = "An Elm package to work with web colors."
+                      }
+                    , { url = "https://github.com/escherlies/elm-ui-window"
+                      , title = "elm-ui-window"
+                      , description = "The engine that powers this page."
+                      }
+                    , { url = "https://github.com/escherlies/elm-ix-dict"
+                      , title = "elm-ix-dict"
+                      , description = "A Dict data structure that derives keys from values."
+                      }
+                    , { url = "https://github.com/escherlies/binary-please-landingpage"
+                      , title = "binary-please-landingpage"
+                      , description = "This page."
+                      }
+                    ]
         }
+
+
+
+-- Fun
 
 
 windowBinaryPlease : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> { b | random : List Int } -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
@@ -142,48 +174,8 @@ windowBinaryPlease ctx model =
         }
 
 
-mapAt : Int -> (a -> a) -> List a -> List a
-mapAt ix fn lst =
-    List.Extra.getAt ix lst
-        |> Maybe.map fn
-        |> Maybe.map (\v -> List.Extra.setAt ix v lst)
-        |> Maybe.withDefault lst
 
-
-replaceAtCenter : String -> String -> String
-replaceAtCenter source target =
-    let
-        targetLength =
-            String.length target
-
-        sourceLength =
-            String.length source
-    in
-    replaceAt (targetLength // 2 - sourceLength // 2) source target
-
-
-replaceAt : Int -> String -> String -> String
-replaceAt ix source target =
-    let
-        words =
-            String.words source
-    in
-    foldl
-        (\word ( offset, acc ) ->
-            ( offset + String.length word + 1, replaceWordAt offset word acc )
-        )
-        ( ix, target )
-        words
-        |> Tuple.second
-
-
-replaceWordAt : Int -> String -> String -> String
-replaceWordAt ix source target =
-    String.slice 0 ix target ++ source ++ String.slice (ix + String.length source) (String.length target) target
-
-
-
---
+-- Boring stuff
 
 
 legalDisclosure : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
@@ -245,3 +237,47 @@ VAT identification number in accordance with Section 27 an of the German VAT act
 The contents of binaryplease.com, unless otherwise stated, is protected by copyright.
 """
         }
+
+
+
+-- Utils
+
+
+mapAt : Int -> (a -> a) -> List a -> List a
+mapAt ix fn lst =
+    List.Extra.getAt ix lst
+        |> Maybe.map fn
+        |> Maybe.map (\v -> List.Extra.setAt ix v lst)
+        |> Maybe.withDefault lst
+
+
+replaceAtCenter : String -> String -> String
+replaceAtCenter source target =
+    let
+        targetLength =
+            String.length target
+
+        sourceLength =
+            String.length source
+    in
+    replaceAt (targetLength // 2 - sourceLength // 2) source target
+
+
+replaceAt : Int -> String -> String -> String
+replaceAt ix source target =
+    let
+        words =
+            String.words source
+    in
+    foldl
+        (\word ( offset, acc ) ->
+            ( offset + String.length word + 1, replaceWordAt offset word acc )
+        )
+        ( ix, target )
+        words
+        |> Tuple.second
+
+
+replaceWordAt : Int -> String -> String -> String
+replaceWordAt ix source target =
+    String.slice 0 ix target ++ source ++ String.slice (ix + String.length source) (String.length target) target

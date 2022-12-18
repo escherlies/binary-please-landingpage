@@ -9,7 +9,7 @@ import Html exposing (Html)
 import Html.Attributes
 import List exposing (singleton)
 import UI.Color
-import Utils exposing (fgxy__fx_gy)
+import Utils exposing (b1, fgxy__fx_gy)
 
 
 type alias UI =
@@ -124,9 +124,19 @@ class =
     htmlAttribute << Html.Attributes.class
 
 
+style : String -> String -> Attribute msg
+style =
+    b1 htmlAttribute Html.Attributes.style
+
+
 whiteSpacePreWrap : Attribute msg
 whiteSpacePreWrap =
     class "wspw"
+
+
+whiteSpaceNoWrap : Attribute msg
+whiteSpaceNoWrap =
+    class "wsnw"
 
 
 faEl : List (Element.Attribute msg) -> String -> Element msg

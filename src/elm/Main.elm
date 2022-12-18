@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import BrowserWindow exposing (BrowserWindow)
-import Content exposing (debugWindows, defaultPlane, initPlane, legalDisclosure, winddowSettings, windowBinaryPlease, windowProject)
+import Content exposing (debugWindows, defaultPlane, initPlane, legalDisclosure, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, el, fill, height, row, spacing, width)
 import Element.Border
@@ -231,6 +231,10 @@ view model =
                 .wspw > * > .t {
                     white-space: pre-wrap !important;
                 }
+
+                .wsnw > * > .t {
+                    white-space: nowrap !important;
+                }
                 """
             ]
         , root ctx
@@ -293,6 +297,7 @@ windowElements ctx model =
             , winddowSettings toggleAppereanceButton ctx model
             , windowBinaryPlease ctx model
             , windowProject ctx model
+            , windowOpenSource ctx model
             ]
         )
         ++ (if ctx.debug then
