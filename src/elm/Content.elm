@@ -127,27 +127,46 @@ windowProject ctx _ =
 windowOpenSource : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
 windowOpenSource ctx _ =
     viewElement ctx
-        { title = text "Open Source"
+        { title = text "Open soure"
         , content =
-            col [ centerX, centerY, width fill, padding 20, spacing 20 ] <|
-                List.map projectWithDescriptionBelow
-                    [ { url = "https://github.com/escherlies/elm-color"
-                      , title = "elm-color"
-                      , description = "An Elm package to work with web colors."
-                      }
-                    , { url = "https://github.com/escherlies/elm-ui-window"
-                      , title = "elm-ui-window"
-                      , description = "The engine that powers this page."
-                      }
-                    , { url = "https://github.com/escherlies/elm-ix-dict"
-                      , title = "elm-ix-dict"
-                      , description = "A Dict data structure that derives keys from values."
-                      }
-                    , { url = "https://github.com/escherlies/binary-please-landingpage"
-                      , title = "binary-please-landingpage"
-                      , description = "This page."
-                      }
-                    ]
+            col [ centerX, centerY, width fill, padding 20, spacing 20 ]
+                [ text "Packages"
+                , col [ centerX, centerY, width fill, padding 10, spacing 20 ] <|
+                    List.map projectWithDescriptionBelow
+                        [ { url = "https://github.com/escherlies/elm-color"
+                          , title = "elm-color"
+                          , description = "An Elm package to work with web colors."
+                          }
+                        , { url = "https://github.com/escherlies/elm-ui-window"
+                          , title = "elm-ui-window"
+                          , description = "The engine that powers this page."
+                          }
+                        , { url = "https://github.com/escherlies/elm-ix-dict"
+                          , title = "elm-ix-dict"
+                          , description = "A Dict data structure that derives keys from values."
+                          }
+                        ]
+                , text "Tools"
+                , col [ centerX, centerY, width fill, padding 10, spacing 20 ] <|
+                    List.map projectWithDescriptionBelow
+                        [ { url = "https://github.com/escherlies/bumpi"
+                          , title = "bumpi"
+                          , description = "Bumpi - a get next semantic version bump cli tool"
+                          }
+                        , { url = "https://github.com/escherlies/elm-generate-readme"
+                          , title = "elm-generate-readme"
+                          , description = "Generate a README.md from an Elm file."
+                          }
+                        ]
+                , text "Misc"
+                , col [ centerX, centerY, width fill, padding 10, spacing 20 ] <|
+                    List.map projectWithDescriptionBelow
+                        [ { url = "https://github.com/escherlies/binary-please-landingpage"
+                          , title = "binary-please-landingpage"
+                          , description = "This page."
+                          }
+                        ]
+                ]
         }
 
 
