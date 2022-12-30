@@ -193,7 +193,7 @@ handlePortMessages pm model =
             , msgCmd
                 (WindowMsg
                     (Window.updateRects <|
-                        List.map .rect
+                        List.map Window.toRho
                             (windows (getContext model |> (\c -> { c | window = window })) model)
                     )
                 )
