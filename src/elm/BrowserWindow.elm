@@ -1,11 +1,11 @@
 module BrowserWindow exposing (..)
 
 import Json.Decode as D
-import Math.Vector2 exposing (Vec2, vec2)
+import Math.Vector2 exposing (Vec, vec2)
 
 
 type alias BrowserWindow =
-    Vec2
+    Vec Float
 
 
 type alias WithBrowserWindow ctx =

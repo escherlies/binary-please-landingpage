@@ -6,34 +6,34 @@ import Element exposing (alignBottom, alignTop, centerX, centerY, column, el, fi
 import Element.Font
 import List exposing (foldl)
 import List.Extra
-import Math.Vector2 exposing (getX, getY, vec2)
+import Math.Vector2 exposing (Vec, getX, getY, vec2)
 import Ports exposing (PortMessage(..))
 import UI exposing (col, fa, text)
 import UI.Theme exposing (Appereance(..))
 import UI.Window exposing (viewElement)
 import Window exposing (Window)
-import Window.Plane
+import Window.Rect
 import Window.Utils exposing (zero)
 
 
-initPlane : Window.Plane.Plane
-initPlane =
+initRect : Window.Rect.Rect
+initRect =
     { position = zero, size = vec2 330 260 }
 
 
-defaultPlane : { a | window : Math.Vector2.Vec2 } -> Window.Plane.Plane
-defaultPlane ctx =
-    initPlane
-        |> Window.Plane.center ctx.window
+defaultRect : { a | window : Vec Float } -> Window.Rect.Rect
+defaultRect ctx =
+    initRect
+        |> Window.Rect.center ctx.window
 
 
 
 -- Misc
 
 
-debugWindows : Context a -> { b | windowModel : { c | mousePosition : Math.Vector2.Vec2 }, window : Math.Vector2.Vec2 } -> List (Window msg)
+debugWindows : Context a -> { b | windowModel : { c | mousePosition : Vec Float }, window : Vec Float } -> List (Window msg)
 debugWindows ctx model =
-    [ { plane = defaultPlane ctx
+    [ { rect = defaultRect ctx
       , render =
             \tw i w ->
                 viewElement
@@ -51,7 +51,7 @@ debugWindows ctx model =
                     i
                     w
       }
-    , { plane = defaultPlane ctx
+    , { rect = defaultRect ctx
       , render =
             viewElement
                 ctx
@@ -68,7 +68,7 @@ debugWindows ctx model =
     ]
 
 
-winddowSettings : (c -> Element.Element msg) -> Context a -> c -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
+winddowSettings : (c -> Element.Element msg) -> Context a -> c -> (Window.Msg -> msg) -> Int -> Window.Rect.Rect -> Element.Element msg
 winddowSettings toggleAppereanceButton ctx model =
     viewElement ctx
         { title = text "Settings"
@@ -105,7 +105,7 @@ projectWithDescriptionBelow { url, title, description } =
         }
 
 
-windowProject : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
+windowProject : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Rect.Rect -> Element.Element msg
 windowProject ctx _ =
     viewElement ctx
         { title = text "Projects"
@@ -124,7 +124,7 @@ windowProject ctx _ =
         }
 
 
-windowOpenSource : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
+windowOpenSource : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Rect.Rect -> Element.Element msg
 windowOpenSource ctx _ =
     viewElement ctx
         { title = text "Open soure"
@@ -174,7 +174,7 @@ windowOpenSource ctx _ =
 -- Fun
 
 
-windowBinaryPlease : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> { b | random : List Int } -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
+windowBinaryPlease : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> { b | random : List Int } -> (Window.Msg -> msg) -> Int -> Window.Rect.Rect -> Element.Element msg
 windowBinaryPlease ctx model =
     viewElement
         ctx
@@ -197,7 +197,7 @@ windowBinaryPlease ctx model =
 -- Boring stuff
 
 
-legalDisclosure : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Plane.Plane -> Element.Element msg
+legalDisclosure : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Rect.Rect -> Element.Element msg
 legalDisclosure ctx _ =
     viewElement
         ctx

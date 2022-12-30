@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import BrowserWindow exposing (BrowserWindow)
-import Content exposing (debugWindows, defaultPlane, initPlane, legalDisclosure, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
+import Content exposing (debugWindows, defaultRect, initRect, legalDisclosure, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, el, fill, height, row, spacing, width)
 import Element.Border
@@ -10,7 +10,7 @@ import Element.Input
 import Html
 import Json.Decode as D exposing (Decoder, Value)
 import List exposing (map)
-import Math.Vector2 exposing (vec2)
+import Math.Vector2 exposing (Vec, vec2)
 import Ports exposing (PortMessage(..))
 import Random
 import Task
@@ -19,8 +19,8 @@ import UI exposing (col, faEl, root, text)
 import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 import Utils exposing (dropRight, i_, liftResult)
-import Window exposing (Window, mapPlane)
-import Window.Plane exposing (move)
+import Window exposing (Window, mapRect)
+import Window.Rect exposing (move)
 
 
 type alias Flags =
@@ -191,8 +191,8 @@ handlePortMessages pm model =
             ( { model | window = window }
             , msgCmd
                 (WindowMsg
-                    (Window.updatePlanes <|
-                        List.map .plane
+                    (Window.updateRects <|
+                        List.map .rect
                             (windows (getContext model |> (\c -> { c | window = window })) model)
                     )
                 )
@@ -240,6 +240,7 @@ view model =
                 ]
                 (Window.view
                     WindowMsg
+                    { showAnchorPoints = False }
                     model.windowModel
                     (windows ctx model)
                 )
@@ -248,7 +249,7 @@ view model =
     }
 
 
-spread : { a | window : Math.Vector2.Vec2 } -> List (Window msg) -> List (Window msg)
+spread : { a | window : Vec Float } -> List (Window msg) -> List (Window msg)
 spread ctx ws =
     let
         n =
@@ -274,15 +275,15 @@ spread ctx ws =
             List.map2 vec2 xs ys
     in
     -- Apply spread move to each window accordingly
-    List.map2 (mapPlane << move) moves (List.map (mapPlane (always (defaultPlane ctx))) ws)
+    List.map2 (mapRect << move) moves (List.map (mapRect (always (defaultRect ctx))) ws)
         -- Move a little bit up because of humans
-        |> List.map (mapPlane (move (vec2 0 -50)))
+        |> List.map (mapRect (move (vec2 0 -50)))
 
 
 windows : Context a -> Model -> List (Window Msg)
 windows ctx model =
     spread ctx
-        (map (Window initPlane)
+        (map (Window initRect)
             [ legalDisclosure ctx model
             , winddowSettings toggleAppereanceButton ctx model
             , windowBinaryPlease ctx model

@@ -8,10 +8,10 @@ import Element.Font
 import Html.Attributes
 import UI
 import Window exposing (onDrag)
-import Window.Plane exposing (Plane)
+import Window.Rect exposing (Rect)
 
 
-viewElement : Context a -> { d | title : Element msg, content : Element msg } -> (Window.Msg -> msg) -> Int -> Plane -> Element msg
+viewElement : Context a -> { d | title : Element msg, content : Element msg } -> (Window.Msg -> msg) -> Int -> Rect -> Element msg
 viewElement ctx { title, content } toMsg ix _ =
     column
         [ Element.Border.width 2
