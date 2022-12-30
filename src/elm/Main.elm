@@ -20,6 +20,7 @@ import UI.Color
 import UI.Theme exposing (Appereance(..), decodeColorScheme)
 import Utils exposing (dropRight, i_, liftResult)
 import Window exposing (Window, mapRect)
+import Window.Boundary exposing (Resize(..))
 import Window.Rect exposing (move)
 
 
@@ -240,7 +241,6 @@ view model =
                 ]
                 (Window.view
                     WindowMsg
-                    { showAnchorPoints = False }
                     model.windowModel
                     (windows ctx model)
                 )
@@ -290,6 +290,7 @@ windows ctx model =
             , windowOpenSource ctx model
             , windowProject ctx model
             ]
+            |> map ((|>) HideAnchorPoints)
         )
         ++ (if ctx.debug then
                 debugWindows ctx model

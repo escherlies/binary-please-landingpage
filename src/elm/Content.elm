@@ -12,6 +12,7 @@ import UI exposing (col, fa, text)
 import UI.Theme exposing (Appereance(..))
 import UI.Window exposing (viewElement)
 import Window exposing (Window)
+import Window.Boundary exposing (Resize(..))
 import Window.Rect
 import Window.Utils exposing (zero)
 
@@ -50,6 +51,7 @@ debugWindows ctx model =
                     tw
                     i
                     w
+      , resize = HideAnchorPoints
       }
     , { rect = defaultRect ctx
       , render =
@@ -64,6 +66,7 @@ debugWindows ctx model =
                         , text <| "vh = " ++ String.fromFloat (getY model.window)
                         ]
                 }
+      , resize = HideAnchorPoints
       }
     ]
 
