@@ -1,0 +1,3 @@
+[submodule "submodules/elm-ui-window"]
+	path = submodules/elm-ui-window
+	url = https://github.com/escherlies/elm-ui-window.git

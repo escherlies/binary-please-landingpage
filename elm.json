@@ -3,7 +3,7 @@
   "source-directories": [
     "src/elm",
     "libs/elm-ui-color",
-    "../elm-libs/elm-ui-window/src"
+    "submodules/elm-ui-window/src"
   ],
   "elm-version": "0.19.1",
   "dependencies": {
