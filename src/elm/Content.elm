@@ -119,6 +119,10 @@ windowProject ctx _ =
                       , title = "HyHyve"
                       , description = "Online events that are fun!"
                       }
+                    , { url = "https://bitcoin4good.de/"
+                      , title = "BITCOIN4GOOD"
+                      , description = "Direct aid, strong impact: We bring Bitcoin to civil society."
+                      }
                     , { url = "https://www.coffeechat.ai/"
                       , title = "CoffeeChat.ai"
                       , description = "Facilitate intra-company communications with scheduled meetings."
