@@ -5,9 +5,13 @@ import BrowserWindow exposing (BrowserWindow)
 import Content exposing (debugWindows, defaultRect, initRect, legalDisclosure, windowAbout, windowTips, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, el, fill, height, row, spacing, width)
+import Element.Background
 import Element.Border
+import Element.Color
+import Element.Font
 import Element.Input
 import Html
+import Html.Attributes
 import Json.Decode as D exposing (Decoder, Value)
 import List exposing (map)
 import Math.Vector2 exposing (Vec, getX, vec2)
@@ -140,6 +144,7 @@ type Msg
     | PortMsg Ports.PortMessage
     | GotTime Time.Posix
     | GotRandom (List Int)
+    | ResetView
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -183,6 +188,12 @@ update msg model =
 
         ToggleAppereance t ->
             ( { model | settings = model.settings |> (\s -> { s | theme = t }) }, Cmd.none )
+
+        ResetView ->
+            Window.update (Window.resetView identity) model.windowModel
+                |> (\( wm, wcmds ) ->
+                        ( { model | windowModel = wm }, wcmds )
+                   )
 
 
 handlePortMessages : PortMessage -> Model -> ( Model, Cmd Msg )
@@ -238,6 +249,15 @@ view model =
                         ]
                         (List.map getMessage model.messages)
                     )
+                , Element.inFront
+                    (el
+                        [ Element.alignBottom
+                        , Element.centerX
+                        , Element.padding 20
+                        , Element.htmlAttribute (Html.Attributes.style "z-index" "9999999999")
+                        ]
+                        (resetViewButton ctx model)
+                    )
                 ]
                 (Window.view
                     WindowMsg
@@ -255,40 +275,66 @@ spread ctx ws =
         n =
             List.length ws
 
-        d =
-            48
+        windowWidth =
+            getX ctx.window
+
+        -- Independent x and y spacing for narrow screens
+        -- x is tight, y is relaxed on mobile
+        ( dx, dy ) =
+            if windowWidth < 745 then
+                ( 0, 48 )
+
+            else
+                ( 48, 48 )
 
         xs =
             List.range 1 n
-                |> map (i_ (*) d)
-                |> map (i_ (-) (n * d // 2))
+                |> map (i_ (*) dx)
+                |> map (i_ (-) (n * dx // 2))
                 |> map (i_ (*) -1)
                 |> map toFloat
 
         ys =
             List.range 1 n
-                |> map (i_ (*) d)
-                |> map (i_ (-) (n * d // 2))
+                |> map (i_ (*) dy)
+                |> map (i_ (-) (n * dy // 2))
                 |> map toFloat
 
         moves =
             List.map2 vec2 xs ys
+
+        -- Adjust vertical offset for smaller screens
+        verticalOffset =
+            if windowWidth < 745 then
+                -20
+
+            else
+                -50
     in
     -- Apply spread move to each window accordingly
     List.map2 (mapRect << move) moves (List.map (mapRect (always (defaultRect ctx))) ws)
         -- Move a little bit up because of humans
-        |> List.map (mapRect (move (vec2 0 -50)))
+        |> List.map (mapRect (move (vec2 0 verticalOffset)))
 
 
 windows : Context a -> Model -> List (Window Msg)
 windows ctx model =
     let
-        -- Tips window positioned in top right
+        windowWidth =
+            getX ctx.window
+
+        -- Tips window positioned in top right, adjusted for smaller screens
         tipsWindow =
             { rect =
-                { position = vec2 (getX ctx.window - 200 - 20) 20
-                , size = vec2 200 200
-                }
+                if windowWidth < 745 then
+                    { position = vec2 (getX ctx.window - 160 - 10) 10
+                    , size = vec2 160 160
+                    }
+
+                else
+                    { position = vec2 (getX ctx.window - 200 - 20) 20
+                    , size = vec2 200 200
+                    }
             , render = windowTips ctx model
             , resize = HideAnchorPoints
             }
@@ -337,6 +383,20 @@ toggleAppereanceButton model =
 
                     else
                         Light
+        }
+
+
+resetViewButton : Context a -> b -> Element Msg
+resetViewButton ctx _ =
+    Element.Input.button
+        [ Element.Border.width 2
+        , Element.padding 8
+        , Element.Color.fontColor ctx.ui.colors.foreground
+        , Element.Color.backgroundColor ctx.ui.colors.background
+        , Element.htmlAttribute (Html.Attributes.style "cursor" "pointer")
+        ]
+        { onPress = Just ResetView
+        , label = Element.text "Reset View"
         }
 
 

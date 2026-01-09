@@ -26,7 +26,19 @@ initRect =
 
 defaultRect : { a | window : Vec Float } -> Window.Rect.Rect
 defaultRect ctx =
-    initRect
+    let
+        windowWidth =
+            getX ctx.window
+
+        -- Use smaller window size for narrow screens
+        baseRect =
+            if windowWidth < 745 then
+                { position = zero, size = vec2 280 220 }
+
+            else
+                initRect
+    in
+    baseRect
         |> Window.Rect.center ctx.window
 
 
