@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import BrowserWindow exposing (BrowserWindow)
-import Content exposing (debugWindows, defaultRect, initRect, legalDisclosure, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
+import Content exposing (debugWindows, defaultRect, initRect, legalDisclosure, windowAbout, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, el, fill, height, row, spacing, width)
 import Element.Border
@@ -286,6 +286,7 @@ windows ctx model =
         (map (Window initRect)
             [ legalDisclosure ctx model
             , winddowSettings toggleAppereanceButton ctx model
+            , windowAbout ctx model
             , windowBinaryPlease ctx model
             , windowOpenSource ctx model
             , windowProject ctx model

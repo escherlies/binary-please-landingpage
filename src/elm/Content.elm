@@ -90,8 +90,16 @@ winddowSettings toggleAppereanceButton ctx model =
 -- Projects
 
 
-projectWithDescriptionBelow : { a | url : String, title : String, description : String } -> Element.Element msg
-projectWithDescriptionBelow { url, title, description } =
+type alias ProjectInfo =
+    { url : String
+    , title : String
+    , description : String
+    , company : Maybe String
+    }
+
+
+projectWithDescriptionBelow : ProjectInfo -> Element.Element msg
+projectWithDescriptionBelow { url, title, description, company } =
     Element.newTabLink
         []
         { url = url
@@ -100,6 +108,12 @@ projectWithDescriptionBelow { url, title, description } =
                 [ el [ alignTop ] <| paragraph [] [ fa "up-right-from-square fa-sm" ]
                 , column [ width fill, spacing 8 ]
                     [ el [ Element.Font.bold, alignTop, UI.whiteSpaceNoWrap ] <| text title
+                    , case company of
+                        Just companyName ->
+                            el [ Element.Font.italic, alignTop ] <| text companyName
+
+                        Nothing ->
+                            Element.none
                     , Element.paragraph [ alignTop ]
                         [ text description
                         ]
@@ -118,14 +132,17 @@ windowProject ctx _ =
                     [ { url = "https://www.hyhyve.com/"
                       , title = "HyHyve"
                       , description = "Online events that are fun!"
+                      , company = Nothing
                       }
-                    , { url = "https://bitcoin4good.de/"
-                      , title = "BITCOIN4GOOD"
-                      , description = "Direct aid, strong impact: We bring Bitcoin to civil society."
+                    , { url = "https://everynamecounts.arolsen-archives.org/"
+                      , title = "#everynamecounts"
+                      , description = "A crowdsourcing initiative to digitize documents of Nazi persecution victims and make their stories accessible to everyone."
+                      , company = Just "Arolsen Archives"
                       }
-                    , { url = "https://www.coffeechat.ai/"
-                      , title = "CoffeeChat.ai"
-                      , description = "Facilitate intra-company communications with scheduled meetings."
+                    , { url = "https://2025.nixcon.org/"
+                      , title = "NixCon 2025"
+                      , description = "The annual community conference for contributors and users of Nix and NixOS."
+                      , company = Just "NixOS Foundation"
                       }
                     ]
         }
@@ -143,14 +160,17 @@ windowOpenSource ctx _ =
                         [ { url = "https://github.com/escherlies/elm-color"
                           , title = "elm-color"
                           , description = "An Elm package to work with web colors."
+                          , company = Nothing
                           }
                         , { url = "https://github.com/escherlies/elm-ui-window"
                           , title = "elm-ui-window"
                           , description = "The engine that powers this page."
+                          , company = Nothing
                           }
                         , { url = "https://github.com/escherlies/elm-ix-dict"
                           , title = "elm-ix-dict"
                           , description = "A Dict data structure that derives keys from values."
+                          , company = Nothing
                           }
                         ]
                 , text "Tools"
@@ -159,10 +179,12 @@ windowOpenSource ctx _ =
                         [ { url = "https://github.com/escherlies/bumpi"
                           , title = "bumpi"
                           , description = "Bumpi - a get next semantic version bump cli tool"
+                          , company = Nothing
                           }
                         , { url = "https://github.com/escherlies/elm-generate-readme"
                           , title = "elm-generate-readme"
                           , description = "Generate a README.md from an Elm file."
+                          , company = Nothing
                           }
                         ]
                 , text "Misc"
@@ -171,6 +193,7 @@ windowOpenSource ctx _ =
                         [ { url = "https://github.com/escherlies/binary-please-landingpage"
                           , title = "binary-please-landingpage"
                           , description = "This page."
+                          , company = Nothing
                           }
                         ]
                 ]
@@ -197,6 +220,32 @@ windowBinaryPlease ctx model =
                     |> mapAt 8 (replaceAtCenter "_<3_")
                     |> List.map text
                 )
+        }
+
+
+
+-- About
+
+
+windowAbout : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Rect.Rect -> Element.Element msg
+windowAbout ctx _ =
+    viewElement ctx
+        { title = text "About"
+        , content =
+            col [ centerX, centerY, width fill, padding 20, spacing 20 ]
+                [ paragraph []
+                    [ text "We build web applications that just work. Reliable, interactive, and crafted with a functional programming mindset."
+                    ]
+                , paragraph []
+                    [ text "Our own fully bootstrapped startup runs on the same principles—no investors, no distractions, just code and iteration."
+                    ]
+                , paragraph []
+                    [ text "We consult with NGOs, helping them solve real problems with technology."
+                    ]
+                , paragraph []
+                    [ text "Wherever possible, we keep our work public. Open source isn’t just a buzzword—it’s a part of our workflow."
+                    ]
+                ]
         }
 
 
