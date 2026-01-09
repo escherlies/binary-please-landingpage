@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Browser exposing (Document)
 import BrowserWindow exposing (BrowserWindow)
-import Content exposing (debugWindows, defaultRect, initRect, legalDisclosure, windowAbout, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
+import Content exposing (debugWindows, defaultRect, initRect, legalDisclosure, windowAbout, windowTips, winddowSettings, windowBinaryPlease, windowOpenSource, windowProject)
 import Context exposing (Context, Lang(..))
 import Element exposing (Element, el, fill, height, row, spacing, width)
 import Element.Border
@@ -10,7 +10,7 @@ import Element.Input
 import Html
 import Json.Decode as D exposing (Decoder, Value)
 import List exposing (map)
-import Math.Vector2 exposing (Vec, vec2)
+import Math.Vector2 exposing (Vec, getX, vec2)
 import Ports exposing (PortMessage(..))
 import Random
 import Task
@@ -282,6 +282,17 @@ spread ctx ws =
 
 windows : Context a -> Model -> List (Window Msg)
 windows ctx model =
+    let
+        -- Tips window positioned in top right
+        tipsWindow =
+            { rect =
+                { position = vec2 (getX ctx.window - 200 - 20) 20
+                , size = vec2 200 200
+                }
+            , render = windowTips ctx model
+            , resize = HideAnchorPoints
+            }
+    in
     spread ctx
         (map (Window initRect)
             [ legalDisclosure ctx model
@@ -293,6 +304,7 @@ windows ctx model =
             ]
             |> map ((|>) HideAnchorPoints)
         )
+        ++ [ tipsWindow ]
         ++ (if ctx.debug then
                 debugWindows ctx model
 

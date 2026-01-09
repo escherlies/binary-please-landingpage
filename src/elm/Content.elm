@@ -2,7 +2,9 @@ module Content exposing (..)
 
 import BrowserWindow exposing (BrowserWindow)
 import Context exposing (Context, Lang(..))
-import Element exposing (alignBottom, alignTop, centerX, centerY, column, el, fill, padding, paragraph, row, spacing, width)
+import Element exposing (alignBottom, alignTop, centerX, centerY, column, el, fill, height, padding, paragraph, row, spacing, width)
+import Element.Border
+import Element.Color
 import Element.Font
 import List exposing (foldl)
 import List.Extra
@@ -248,6 +250,27 @@ windowAbout ctx _ =
                 ]
         }
 
+
+
+-- Tips
+
+
+windowTips : { a | version : Int, lang : Lang, ui : UI.UI, window : BrowserWindow, debug : Bool } -> b -> (Window.Msg -> msg) -> Int -> Window.Rect.Rect -> Element.Element msg
+windowTips ctx _ =
+    viewElement ctx
+        { title = text "Tips"
+        , content =
+            col [ centerX, centerY, width fill, padding 20, spacing 12 ]
+                [ row [ spacing 8 ]
+                    [ el [] <| fa "hand-pointer"
+                    , paragraph [] [ text "Click or drag windows at the title bar" ]
+                    ]
+                , row [ spacing 8 ]
+                    [ el [] <| fa "arrows-maximize"
+                    , paragraph [] [ text "Resize them" ]
+                    ]
+                ]
+        }
 
 
 -- Boring stuff
